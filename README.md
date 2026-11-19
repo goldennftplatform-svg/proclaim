@@ -79,12 +79,38 @@ registry/
 │       └── src/bin/registry.rs
 ├── examples/             # CLI tools
 │   └── src/bin/
-│       ├── generate_idl.rs    # One-liner IDL generator
-│       └── registry_cli.rs # Three-line CLI wrapper
+│       ├── generate_idl.rs     # One-liner IDL generator
+│       ├── registry_cli.rs     # Three-line CLI wrapper
+│       └── registry_browser.rs # Enumerate/filter on-chain registry entries
 ├── spel.toml                         # SPEL CLI config (IDL and binary paths)
 ├── Makefile
 └── registry-idl.json       # Auto-generated IDL
 ```
+
+## Registry Browser (read-only host tool)
+
+`registry_browser` enumerates the on-chain global index, derives each entry PDA,
+fetches and Borsh-decodes the entries, and filters by tag / author / independent
+verification. It reads the sequencer connection from `LEE_WALLET_HOME_DIR`.
+
+```bash
+source ~/.cargo/env
+export RUSTFLAGS='--cfg getrandom_backend="custom"'
+export LEE_WALLET_HOME_DIR="$PWD/.scaffold/wallet"
+cargo build -p registry-examples --bin registry_browser
+
+./target/debug/registry_browser                    # table of all entries
+./target/debug/registry_browser --index-only       # just the global index
+./target/debug/registry_browser --tag registry     # filter by tag (repeatable)
+./target/debug/registry_browser --verified         # only independently verified
+./target/debug/registry_browser --author <base58>  # filter by author
+./target/debug/registry_browser --json             # full JSON records
+```
+
+Verified against localnet: the tool derives the exact known index PDA
+(`9mr5hePKo24ZHNztzVpuRND7PeAsR17yQ2M5HHPKcbw3`) and entry PDA, and decodes the
+live `RegistryEntry`. Uses `registry_core`'s Borsh types, so host and guest stay
+byte-identical.
 
 ## How It Works
 
