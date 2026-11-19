@@ -11,8 +11,8 @@
 #
 # Example:
 #   scripts/verify-source.sh \
-#     148657614d74b2a7a7cb764804a41f915ae4624128d808b8c2626fec27777dd5 \
-#     /home/xps/logos-work/registry QmRebuildEvidenceV4
+#     4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144 \
+#     /home/xps/logos-work/registry QmRebuildEvidenceV5
 
 set -euo pipefail
 
