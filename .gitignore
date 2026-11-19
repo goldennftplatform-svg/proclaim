@@ -7,3 +7,6 @@ ui/*/build/
 *.lgx
 *.out
 *.log
+
+.claude/
+.cursor/
