@@ -1,5 +1,6 @@
 target/
 **/target/
+artifacts/
 .scaffold/
 .registry-state
 ui/*/build/
