@@ -1,0 +1,9 @@
+target/
+**/target/
+.scaffold/
+.registry-state
+ui/*/build/
+*.so
+*.lgx
+*.out
+*.log

@@ -1,0 +1,43 @@
+[scaffold]
+version = "0.2.0"
+
+[repos.lez]
+source = "https://github.com/logos-blockchain/logos-execution-zone.git"
+pin = "47eba256479f6f785acbd138834340703cd03401"
+
+[repos.spel]
+source = "https://github.com/logos-co/spel.git"
+pin = "4107dcb14ec0eb64e9e80a9691a3df0b9acd3c2b"
+
+[repos.basecamp]
+source = "https://github.com/logos-co/logos-basecamp.git"
+pin = "bbe5da0e038ef19095690f4164a8ddaab0915821"
+build = "nix-flake"
+attr = "app"
+
+[repos.lgpm]
+source = "github:logos-co/logos-package-manager"
+pin = "d3af2972f51d9c542537d80d60ad8d20282ddcd1"
+build = "nix-flake"
+attr = "cli"
+
+[wallet]
+home_dir = ".scaffold/wallet"
+
+[framework]
+kind = "spel"
+version = "0.1.0"
+
+[framework.idl]
+spec = "lssa-idl/0.1.0"
+path = "idl"
+
+[build]
+guest = "local"
+
+[localnet]
+port = 3041
+risc0_dev_mode = true
+
+[circuits]
+version = "0.4.2"
