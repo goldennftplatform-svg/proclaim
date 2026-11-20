@@ -10,17 +10,10 @@
 use std::env;
 use std::process;
 
-use base58::{FromBase58, ToBase58};
 use nssa::AccountId;
-use nssa_core::program::{PdaSeed, ProgramId};
-use registry_core::{search_entries, RegistryEntry, RegistryIndex};
+use registry_api::{to_base58, DEFAULT_PROGRAM_ID_HEX};
+use registry_core::{RegistryEntry, RegistryIndex};
 use wallet::WalletCore;
-
-/// Final v5 deployed registry program ID.
-const DEFAULT_PROGRAM_ID_HEX: &str =
-    "4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144";
-/// Const PDA seed used by `init_index` / `search` (`registry-idl.json`).
-const INDEX_SEED: &[u8] = b"registry_index";
 
 #[derive(Default, Debug)]
 struct Args {
@@ -99,61 +92,13 @@ fn die(msg: &str) -> ! {
     process::exit(1);
 }
 
-/// Decode a 32-byte key from 64-char hex or base58.
+/// Decode a 32-byte key from 64-char hex or base58 (shared client helper).
 fn parse_key32(s: &str) -> [u8; 32] {
-    let s = s.trim_start_matches("Public/").trim_start_matches("0x");
-    if s.len() == 64 {
-        let mut out = [0u8; 32];
-        for (i, chunk) in s.as_bytes().chunks(2).enumerate() {
-            let h = std::str::from_utf8(chunk).ok().and_then(|x| u8::from_str_radix(x, 16).ok());
-            out[i] = h.unwrap_or_else(|| die(&format!("invalid hex key: {}", s)));
-        }
-        return out;
-    }
-    let bytes = s.from_base58().unwrap_or_else(|_| die(&format!("invalid base58 key: {}", s)));
-    let len = bytes.len();
-    bytes.try_into().unwrap_or_else(|_| die(&format!("key must be 32 bytes, got {}", len)))
-}
-
-fn parse_program_id_hex(s: &str) -> ProgramId {
-    let s = s.trim_start_matches("0x");
-    if s.len() != 64 {
-        die(&format!("program id hex must be 64 chars, got {}", s.len()));
-    }
-    let mut pid = [0u32; 8];
-    for (i, chunk) in s.as_bytes().chunks(8).enumerate() {
-        let word = std::str::from_utf8(chunk)
-            .ok()
-            .and_then(|x| u32::from_str_radix(x, 16).ok())
-            .unwrap_or_else(|| die("invalid program id hex"));
-        pid[i] = word.swap_bytes(); // hex string is big-endian; ProgramId is LE u32 words
-    }
-    pid
-}
-
-fn const_seed(s: &[u8]) -> [u8; 32] {
-    if s.len() > 32 {
-        die("const seed exceeds 32 bytes");
-    }
-    let mut out = [0u8; 32];
-    out[..s.len()].copy_from_slice(s);
-    out
-}
-
-fn index_pda(program_id: &ProgramId) -> AccountId {
-    AccountId::for_public_pda(program_id, &PdaSeed::new(const_seed(INDEX_SEED)))
-}
-
-fn entry_pda(program_id: &ProgramId, key: &[u8; 32]) -> AccountId {
-    AccountId::for_public_pda(program_id, &PdaSeed::new(*key))
-}
-
-fn b58(key: &[u8; 32]) -> String {
-    key.to_base58()
+    registry_api::parse_key32(s).unwrap_or_else(|e| die(&e.to_string()))
 }
 
 fn short_b58(key: &[u8; 32]) -> String {
-    let s = b58(key);
+    let s = to_base58(key);
     if s.len() > 12 {
         format!("{}…{}", &s[..6], &s[s.len() - 4..])
     } else {
@@ -183,14 +128,10 @@ fn civil_from_days(z: i64) -> (i64, i64, i64) {
 }
 
 async fn fetch_data(wc: &WalletCore, id: AccountId) -> Option<Vec<u8>> {
-    match wc.get_account_public(id).await {
-        Ok(acc) if !acc.data.is_empty() => Some(acc.data.to_vec()),
-        Ok(_) => {
-            eprintln!("  warn: {} has no data", id);
-            None
-        }
+    match registry_api::fetch_account_data(wc, id).await {
+        Ok(data) => Some(data),
         Err(e) => {
-            eprintln!("  warn: failed to fetch {}: {}", id, e);
+            eprintln!("  warn: {}", e);
             None
         }
     }
@@ -199,10 +140,11 @@ async fn fetch_data(wc: &WalletCore, id: AccountId) -> Option<Vec<u8>> {
 #[tokio::main]
 async fn main() {
     let args = parse_args();
-    let program_id = parse_program_id_hex(&args.program_id_hex);
+    let program_id = registry_api::program_id_from_hex(&args.program_id_hex)
+        .unwrap_or_else(|e| die(&e.to_string()));
 
     eprintln!("registry program id : 0x{}", args.program_id_hex.trim_start_matches("0x"));
-    let idx_id = index_pda(&program_id);
+    let idx_id = registry_api::index_pda(&program_id).unwrap_or_else(|e| die(&e.to_string()));
     eprintln!("index PDA           : {}", idx_id);
 
     let wallet_home = env::var("LEE_WALLET_HOME_DIR").unwrap_or_else(|_| {
@@ -231,21 +173,21 @@ async fn main() {
     eprintln!("registered programs : {}", index.program_ids.len());
 
     if args.json && args.index_only {
-        let ids: Vec<String> = index.program_ids.iter().map(|k| b58(k)).collect();
+        let ids: Vec<String> = index.program_ids.iter().map(|k| to_base58(k)).collect();
         println!("{}", serde_json::to_string_pretty(&ids).unwrap());
         return;
     }
     if args.index_only {
         println!("{:<52}  {}", "PROGRAM ID (base58)", "HEX");
         for k in &index.program_ids {
-            println!("{:<52}  0x{}", b58(k), k.iter().map(|b| format!("{:02x}", b)).collect::<String>());
+            println!("{:<52}  0x{}", to_base58(k), k.iter().map(|b| format!("{:02x}", b)).collect::<String>());
         }
         return;
     }
 
     let mut entries: Vec<RegistryEntry> = Vec::new();
     for (n, key) in index.program_ids.iter().enumerate() {
-        let id = entry_pda(&program_id, key);
+        let id = registry_api::entry_pda(&program_id, key);
         eprintln!("[{}/{}] fetching {}", n + 1, index.program_ids.len(), id);
         if let Some(data) = fetch_data(&wc, id).await {
             match RegistryEntry::from_account_data(&data) {
@@ -256,8 +198,7 @@ async fn main() {
     }
 
     let author_refs: Vec<&[u8; 32]> = args.authors.iter().collect();
-    let tag_refs: Vec<&str> = args.tags.iter().map(|s| s.as_str()).collect();
-    let matched = search_entries(&entries, &tag_refs, None, args.verified_only);
+    let matched = registry_api::filter_entries(&entries, &args.tags, None, args.verified_only);
     let matched: Vec<&RegistryEntry> = if author_refs.is_empty() {
         matched
     } else {

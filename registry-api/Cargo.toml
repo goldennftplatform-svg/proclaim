@@ -1,0 +1,26 @@
+[package]
+name = "registry-api"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Read-only HTTP JSON API over the on-chain LP-0023 program registry"
+
+[lib]
+name = "registry_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "registry-api"
+path = "src/main.rs"
+
+[dependencies]
+axum = "0.7"
+tower-http = { version = "0.6", features = ["cors"] }
+form_urlencoded = "1"
+serde = { version = "1.0", features = ["derive"] }
+base58 = "0.2"
+nssa = { git = "https://github.com/logos-blockchain/logos-execution-zone.git", tag = "v0.2.4", package = "lee" }
+nssa_core = { git = "https://github.com/logos-blockchain/logos-execution-zone.git", tag = "v0.2.4", package = "lee_core", features = ["host"] }
+wallet = { git = "https://github.com/logos-blockchain/logos-execution-zone.git", tag = "v0.2.4" }
+registry_core = { path = "../registry_core" }
+tokio = { version = "1.28.2", features = ["net", "rt-multi-thread", "macros", "sync"] }

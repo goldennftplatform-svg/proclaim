@@ -4,6 +4,7 @@ members = [
     "registry_ffi",
     "methods",
     "examples",
+    "registry-api",
 ]
 exclude = [
     "methods/guest",

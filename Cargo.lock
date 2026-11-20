@@ -656,6 +656,7 @@ dependencies = [
  "tower",
  "tower-layer",
  "tower-service",
+ "tracing",
 ]
 
 [[package]]
@@ -676,6 +677,7 @@ dependencies = [
  "sync_wrapper",
  "tower-layer",
  "tower-service",
+ "tracing",
 ]
 
 [[package]]
@@ -6223,12 +6225,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6"
 
 [[package]]
+name = "registry-api"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "base58",
+ "form_urlencoded",
+ "lee",
+ "lee_core",
+ "registry_core",
+ "serde",
+ "tokio",
+ "tower-http",
+ "wallet",
+]
+
+[[package]]
 name = "registry-examples"
 version = "0.1.0"
 dependencies = [
  "base58",
  "lee",
  "lee_core",
+ "registry-api",
  "registry_core",
  "serde_json",
  "spel",

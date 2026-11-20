@@ -49,6 +49,8 @@ make cli ARGS="--dry-run -- <command> --arg1 value1"
 | `make build` | Build the guest binary (risc0) |
 | `make idl` | Generate IDL JSON from program source |
 | `make cli ARGS="..."` | Run the IDL-driven CLI |
+| `make browser` | Enumerate/filter on-chain registry entries (read-only) |
+| `make api` | Run the read-only Axum JSON API on `127.0.0.1:3030` |
 | `make deploy` | Deploy program to sequencer |
 | `make inspect` | Show ProgramId for built binary |
 | `make setup` | Create accounts via wallet |
@@ -82,6 +84,9 @@ registry/
 │       ├── generate_idl.rs     # One-liner IDL generator
 │       ├── registry_cli.rs     # Three-line CLI wrapper
 │       └── registry_browser.rs # Enumerate/filter on-chain registry entries
+├── registry-api/        # Read-only Axum JSON API + shared host-side client helpers
+│   ├── src/lib.rs            # PDA derivation, account fetch/decode, filtering
+│   └── src/main.rs           # HTTP server and request handlers
 ├── spel.toml                         # SPEL CLI config (IDL and binary paths)
 ├── Makefile
 └── registry-idl.json       # Auto-generated IDL
@@ -111,6 +116,51 @@ Verified against localnet: the tool derives the exact known index PDA
 (`9mr5hePKo24ZHNztzVpuRND7PeAsR17yQ2M5HHPKcbw3`) and entry PDA, and decodes the
 live `RegistryEntry`. Uses `registry_core`'s Borsh types, so host and guest stay
 byte-identical.
+
+## Registry JSON API (read-only)
+
+`registry-api` is a small Axum HTTP server exposing the same on-chain data as
+`registry_browser`. Both binaries share the fetch/decode/filter helpers in
+`registry-api/src/lib.rs`, so host behaviour stays consistent. It never submits
+transactions.
+
+```bash
+source ~/.cargo/env
+export RUSTFLAGS='--cfg getrandom_backend="custom"'
+export LEE_WALLET_HOME_DIR="$PWD/.scaffold/wallet"   # sequencer config lives here
+make api
+# or: cargo run -p registry-api --bin registry-api
+```
+
+Configuration (all optional):
+
+| Env var | Default |
+|---|---|
+| `REGISTRY_API_ADDR` | `127.0.0.1:3030` |
+| `LEE_WALLET_HOME_DIR` | `.scaffold/wallet` (relative to the working directory) |
+| `REGISTRY_PROGRAM_ID` | final v5 program ID (hex, 64 chars) |
+
+Endpoints (all `GET`, JSON responses; errors are `{"error":"..."}`):
+
+| Endpoint | Description |
+|---|---|
+| `/health` | `{"status":"ok"}` |
+| `/index` | Array of registered program IDs (base58 strings) |
+| `/entries` | Array of full decoded `RegistryEntry` objects |
+| `/search?tag=registry&tag=spel&author=<base58>&verified=true&limit=10` | Filtered entries. Tags are OR-matched (case-insensitive substring, as in `search_entries`); `author`, `verified` and `limit` are optional |
+| `/entry/<base58>` | Single entry by program ID; `404` when it is not in the index |
+
+`[u8; 32]` fields in `RegistryEntry` (`program_id`, `author`, `verifier`) are
+serialized as JSON arrays of bytes, matching `registry_browser --json`. Invalid
+query parameters return `400`; upstream account/decode failures return `502` or
+`500` with a JSON error body.
+
+```bash
+curl -s http://127.0.0.1:3030/health
+curl -s http://127.0.0.1:3030/index
+curl -s http://127.0.0.1:3030/search?tag=registry
+curl -s http://127.0.0.1:3030/entry/6FMaVQ6CmbAVNHgwsmmeBe5kiiKkQRFtqu4GUQ2vAf2T
+```
 
 ## How It Works
 

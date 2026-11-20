@@ -32,7 +32,7 @@ define save_var
 	@mv $(STATE_FILE).tmp $(STATE_FILE)
 endef
 
-.PHONY: help all build idl cli browser deploy setup inspect status clean ffi-gen ffi ui-gen ui-regen ui-build ui-run ui-package lgx lgx-sign install
+.PHONY: help all build idl cli browser api deploy setup inspect status clean ffi-gen ffi ui-gen ui-regen ui-build ui-run ui-package lgx lgx-sign install
 
 help: ## Show this help
 	@echo "registry — SPEL Program"
@@ -42,6 +42,7 @@ help: ## Show this help
 	@echo "  make idl         Generate IDL from program source"
 	@echo "  make cli ARGS=   Run the IDL-driven CLI (reads spel.toml for config)"
 	@echo "  make browser ARGS=  Enumerate/filter on-chain registry entries"
+	@echo "  make api         Run the read-only Axum JSON API (127.0.0.1:3030)"
 	@echo "  make deploy      Deploy program to sequencer"
 	@echo "  make setup       Create accounts needed for the program"
 	@echo "  make inspect     Show ProgramId for built binary"
@@ -94,6 +95,9 @@ cli: ## Run the IDL-driven CLI (ARGS="...")
 
 browser: ## Build & run the read-only registry browser (ARGS="...")
 	cargo run --bin registry_browser -- $(ARGS)
+
+api: ## Build & run the read-only registry JSON API
+	cargo run -p registry-api --bin registry-api
 
 deploy: ## Deploy program to sequencer
 	@test -f "$(PROGRAM_BIN)" || (echo "ERROR: Binary not found. Run 'make build' first."; exit 1)

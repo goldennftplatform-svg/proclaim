@@ -22,6 +22,7 @@ nssa_core = { git = "https://github.com/logos-blockchain/logos-execution-zone.gi
 wallet = { git = "https://github.com/logos-blockchain/logos-execution-zone.git", tag = "v0.2.4" }
 spel = { git = "https://github.com/logos-co/spel.git", tag = "v0.7.0" }
 registry_core = { path = "../registry_core" }
+registry-api = { path = "../registry-api" }
 serde_json = "1.0"
 base58 = "0.2"
 tokio = { version = "1.28.2", features = ["net", "rt-multi-thread", "sync", "macros"] }
