@@ -1,0 +1,10 @@
+Successfully loaded UI module: "package_manager_ui"
+ShortcutBridge: bound 1 QML shortcut(s) on pane QQuickWidget
+ShortcutBridge: bound 1 QML shortcut(s) on pane QQuickWidget
+[2026-11-20 15:23:59.100] [warning] [logos] [capability_module] Warning: QObject::connect: No such signal ::eventResponse(QString,QVariantList)
+qt.xkb.compose: failed to create compose table
+[2026-11-20 15:27:45.638] [warning] [logos] [package_manager] Warning: Package is signed by a key no trusted anchor validates: /tmp/pmui-DqtgfF/cd803076-2f42-4dfc-8eb4-6482ede6c4a9.lgx
+[2026-11-20 15:27:45.642] [info] [logos] [package_manager]   signer DID: did:jwk:eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6ImpiZDM1NHFnMkhHSkg4NVpHcVFJNmFjckNfQWs0SXE0ZnRyakFxUEo3UzAifQ
+[2026-11-20 15:27:45.642] [info] [logos] [package_manager]   signer claims to be: proclaim LP-0023 (self-asserted, not verified)
+[2026-11-20 15:27:45.642] [info] [logos] [package_manager]   checked against keyring: /home/xps/logos-work/basecamp-test/session/keyring
+UI plugin file installed: "/home/xps/logos-work/basecamp-test/session/plugins/registry/libregistry_plugin.so"
