@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+
 # @lp0023/registry-client
 
 Small, dependency-free ESM client for the read-only [LP-0023](../../LP0023.md)
