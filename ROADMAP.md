@@ -47,6 +47,14 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
 - [x] Draft the solution PR body (`docs/SOLUTION-LP-0023.md`) and submission
       steps (`docs/SUBMIT-LP-0023.md`), modelled on solution PR #187's
       early-draft pattern. Not yet opened in `logos-co/lambda-prize`.
+- [x] CI workflow with fmt/clippy/unit tests on push/PR (`.github/workflows/ci.yml`);
+      manual real-sequencer E2E job documented in `docs/CI.md`.
+- [x] Clean-environment demo script (`scripts/demo-clean.sh`) with offline and
+      read-only online modes.
+- [x] Adoption outreach kit in `docs/adoption/` (builder-hub post, third-party
+      module starter, honest adoption tracker).
+- [x] Re-check the published LP-0023 spec and open PRs (`docs/SPEC-RECHECK.md`):
+      no competing solution PR; #188/#189 spec/policy changes still unmerged.
 - [ ] Ensure every criterion in the LP-0023 spec maps to a linked artifact.
 - [ ] Public posting history / account history checks: keep all work in the
       published repo and public testnet, no manufactured volume.

@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_e2e:
+        description: 'Run the real-sequencer E2E job (needs sequencer secrets)'
+        type: boolean
+        default: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_BUILD_JOBS: 2
+  # Matches the local host build; required by the LEZ custom getrandom backend.
+  RUSTFLAGS: '--cfg getrandom_backend="custom"'
+
+jobs:
+  rust:
+    name: Rust — fmt, clippy, unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy (host crates)
+        run: cargo clippy -p registry_core -p registry-api -p registry-examples --all-targets -- -D warnings
+
+      - name: Unit tests (registry_core)
+        run: cargo test -p registry_core
+
+      - name: Compile check (API + host tools)
+        run: cargo check -p registry-api -p registry-examples --all-targets
+
+  js:
+    name: JS client tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run JS client tests
+        run: node --test clients/js/test/registry.test.js
+
+  # Kept as a manual job: a real sequencer and a dedicated wallet config must be
+  # available. See docs/CI.md for the secrets and why this is not yet enabled on
+  # push/PR events.
+  e2e:
+    name: E2E — real sequencer (manual)
+    if: github.event_name == 'workflow_dispatch' && inputs.run_e2e
+    runs-on: ubuntu-24.04
+    env:
+      LEE_WALLET_HOME_DIR: ${{ github.workspace }}/.scaffold/wallet
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Restore wallet configuration
+        env:
+          WALLET_HOME_B64: ${{ secrets.E2E_WALLET_HOME_B64 }}
+        run: |
+          if [ -z "$WALLET_HOME_B64" ]; then
+            echo '::error::E2E_WALLET_HOME_B64 secret is not set'
+            exit 1
+          fi
+          mkdir -p "$LEE_WALLET_HOME_DIR"
+          printf '%s' "$WALLET_HOME_B64" | base64 -d | tar -xz -C "$LEE_WALLET_HOME_DIR"
+          chmod -R go-rwx "$LEE_WALLET_HOME_DIR"
+
+      - name: Build read-only host tools
+        run: cargo build -p registry-examples --bin registry_browser
+
+      - name: Read index from the real sequencer
+        run: ./target/debug/registry_browser --index-only

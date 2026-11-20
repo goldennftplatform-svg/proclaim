@@ -38,19 +38,31 @@ struct ApiError {
 
 impl ApiError {
     fn bad_request(message: impl Into<String>) -> Self {
-        Self { status: StatusCode::BAD_REQUEST, message: message.into() }
+        Self {
+            status: StatusCode::BAD_REQUEST,
+            message: message.into(),
+        }
     }
 
     fn not_found(message: impl Into<String>) -> Self {
-        Self { status: StatusCode::NOT_FOUND, message: message.into() }
+        Self {
+            status: StatusCode::NOT_FOUND,
+            message: message.into(),
+        }
     }
 
     fn internal(message: impl Into<String>) -> Self {
-        Self { status: StatusCode::INTERNAL_SERVER_ERROR, message: message.into() }
+        Self {
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+            message: message.into(),
+        }
     }
 
     fn bad_gateway(message: impl Into<String>) -> Self {
-        Self { status: StatusCode::BAD_GATEWAY, message: message.into() }
+        Self {
+            status: StatusCode::BAD_GATEWAY,
+            message: message.into(),
+        }
     }
 }
 
@@ -61,7 +73,13 @@ struct ErrorBody {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        (self.status, Json(ErrorBody { error: self.message })).into_response()
+        (
+            self.status,
+            Json(ErrorBody {
+                error: self.message,
+            }),
+        )
+            .into_response()
     }
 }
 
@@ -126,10 +144,18 @@ fn parse_search_params(raw: Option<String>) -> ApiResult<SearchParams> {
                     return Err(ApiError::bad_request("limit may be specified only once"));
                 }
                 limit = Some(value.parse::<usize>().map_err(|_| {
-                    ApiError::bad_request(format!("invalid limit: '{}' is not a non-negative integer", value))
+                    ApiError::bad_request(format!(
+                        "invalid limit: '{}' is not a non-negative integer",
+                        value
+                    ))
                 })?);
             }
-            other => return Err(ApiError::bad_request(format!("unknown query parameter: '{}'", other))),
+            other => {
+                return Err(ApiError::bad_request(format!(
+                    "unknown query parameter: '{}'",
+                    other
+                )))
+            }
         }
     }
 
@@ -146,7 +172,10 @@ fn parse_bool(value: &str) -> ApiResult<bool> {
     match value.to_ascii_lowercase().as_str() {
         "true" | "1" => Ok(true),
         "false" | "0" => Ok(false),
-        _ => Err(ApiError::bad_request(format!("invalid verified value: '{}' (expected true or false)", value))),
+        _ => Err(ApiError::bad_request(format!(
+            "invalid verified value: '{}' (expected true or false)",
+            value
+        ))),
     }
 }
 
@@ -155,17 +184,23 @@ async fn health() -> Json<HealthResponse> {
 }
 
 async fn index(State(state): State<Arc<ApiState>>) -> ApiResult<Json<Vec<String>>> {
-    let index = state.registry.index(state.program_id)
+    let index = state
+        .registry
+        .index(state.program_id)
         .await
         .map_err(|e| ApiError::internal(e.to_string()))?;
     Ok(Json(index.program_ids.iter().map(to_base58).collect()))
 }
 
 async fn entries(State(state): State<Arc<ApiState>>) -> ApiResult<Json<Vec<RegistryEntry>>> {
-    let index = state.registry.index(state.program_id)
+    let index = state
+        .registry
+        .index(state.program_id)
         .await
         .map_err(|e| ApiError::internal(e.to_string()))?;
-    let entries = state.registry.entries(state.program_id, index.clone())
+    let entries = state
+        .registry
+        .entries(state.program_id, index.clone())
         .await
         .map_err(|e| ApiError::internal(e.to_string()))?;
     Ok(Json(entries))
@@ -176,10 +211,14 @@ async fn search(
     raw_query: RawQuery,
 ) -> ApiResult<Json<Vec<RegistryEntry>>> {
     let params = parse_search_params(raw_query.0)?;
-    let index = state.registry.index(state.program_id)
+    let index = state
+        .registry
+        .index(state.program_id)
         .await
         .map_err(|e| ApiError::internal(e.to_string()))?;
-    let entries = state.registry.entries(state.program_id, index.clone())
+    let entries = state
+        .registry
+        .entries(state.program_id, index.clone())
         .await
         .map_err(|e| ApiError::internal(e.to_string()))?;
 
@@ -204,15 +243,24 @@ async fn entry(
 ) -> ApiResult<Json<RegistryEntry>> {
     let key = parse_key32(&program_id)
         .map_err(|e| ApiError::bad_request(format!("invalid program id: {}", e)))?;
-    let index = state.registry.index(state.program_id)
+    let index = state
+        .registry
+        .index(state.program_id)
         .await
         .map_err(|e| ApiError::internal(e.to_string()))?;
     if !index.program_ids.contains(&key) {
-        return Err(ApiError::not_found(format!("program id '{}' is not in the registry index", program_id)));
+        return Err(ApiError::not_found(format!(
+            "program id '{}' is not in the registry index",
+            program_id
+        )));
     }
-    let entry = state.registry.entry(state.program_id, key)
+    let entry = state
+        .registry
+        .entry(state.program_id, key)
         .await
-        .map_err(|e| ApiError::bad_gateway(format!("failed to load entry '{}': {}", program_id, e)))?;
+        .map_err(|e| {
+            ApiError::bad_gateway(format!("failed to load entry '{}': {}", program_id, e))
+        })?;
     Ok(Json(entry))
 }
 
@@ -231,15 +279,18 @@ fn configure_wallet_home() -> PathBuf {
 #[tokio::main]
 async fn main() {
     let addr = env::var("REGISTRY_API_ADDR").unwrap_or_else(|_| DEFAULT_ADDR.to_string());
-    let program_id_hex = env::var("REGISTRY_PROGRAM_ID")
-        .unwrap_or_else(|_| DEFAULT_PROGRAM_ID_HEX.to_string());
+    let program_id_hex =
+        env::var("REGISTRY_PROGRAM_ID").unwrap_or_else(|_| DEFAULT_PROGRAM_ID_HEX.to_string());
     let program_id = program_id_from_hex(&program_id_hex).unwrap_or_else(|e| {
         eprintln!("error: invalid REGISTRY_PROGRAM_ID: {}", e);
         std::process::exit(1);
     });
 
     let wallet_home = configure_wallet_home();
-    eprintln!("registry program id : 0x{}", program_id_hex.trim_start_matches("0x"));
+    eprintln!(
+        "registry program id : 0x{}",
+        program_id_hex.trim_start_matches("0x")
+    );
     eprintln!("wallet home         : {}", wallet_home.display());
 
     let registry = RegistryService::start().await.unwrap_or_else(|e| {
@@ -248,7 +299,10 @@ async fn main() {
         std::process::exit(1);
     });
 
-    let state = Arc::new(ApiState { registry, program_id });
+    let state = Arc::new(ApiState {
+        registry,
+        program_id,
+    });
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods([Method::GET])
@@ -262,10 +316,12 @@ async fn main() {
         .layer(cors)
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap_or_else(|e| {
-        eprintln!("error: failed to bind {}: {}", addr, e);
-        std::process::exit(1);
-    });
+    let listener = tokio::net::TcpListener::bind(&addr)
+        .await
+        .unwrap_or_else(|e| {
+            eprintln!("error: failed to bind {}: {}", addr, e);
+            std::process::exit(1);
+        });
     eprintln!("registry-api listening on http://{}", addr);
     axum::serve(listener, app).await.unwrap_or_else(|e| {
         eprintln!("error: server failed: {}", e);

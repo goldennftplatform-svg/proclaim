@@ -4,6 +4,8 @@
 
 > **Status: early draft submission.** This PR is opened early to establish a submission timestamp and start community review while the testnet 0.4 deployment and the adoption push continue, as the prize encourages ("release early"). Several success criteria and **all** Adoption criteria are **not yet met**; they are marked unchecked below and listed under [Pending work](#pending-work). Nothing in this PR should be read as claiming a criterion that is not checked.
 
+> **Spec check (2026-11-19):** the published LP-0023 spec on `master` still requires SPEL with a SPEL-generated IDL and already targets testnet 0.4. No competing LP-0023 solution PR exists. PRs #188 (would replace SPEL with a LEZ actor program and `lez-idl`) and #189 (release-integrity/signing policy) are open but unmerged, so neither is treated as current spec; both must be rechecked immediately before submission. Full findings: [`docs/SPEC-RECHECK.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/SPEC-RECHECK.md).
+
 ## Summary
 
 `proclaim` is a LEZ Program Registry built with SPEL. It turns an opaque LEZ program ID into a discoverable entry with a name, version, author, description, tags, and resolvable pointers to an IDL and source on Logos Storage, and it records an independently reproducible source-verification attestation.
@@ -15,7 +17,7 @@ The deliverables are:
 - an IDL-driven **CLI** (`lgs spel` / `make cli`) covering register, update, lookup, search and source verification, plus a read-only `registry_browser` enumerator;
 - a read-only Axum **HTTP API** (`registry-api`) on `127.0.0.1:3030` and a dependency-free **JS/TS client** (`clients/js`), with a 15-minute integration tutorial;
 - a reusable **QtRO storage upload client** (`tools/qtro_storage_upload.py`) for publishing IDL/source to Logos Storage;
-- a clean-room **reproducible-build verifier** (`scripts/verify-source.sh`), documented design choices, and a Qt/QML Basecamp module scaffold.
+- a clean-room **reproducible-build verifier** (`scripts/verify-source.sh`), a **clean-environment demo script** (`scripts/demo-clean.sh`), documented design choices, and a Qt/QML Basecamp module scaffold.
 
 The full lifecycle has been executed end-to-end against a local standalone sequencer: deploy → `init-index` → `register` → `search` → independent `mark-verified` → `inspect`. Authorization and integrity properties were exercised: self-verification is rejected, unauthorized update is rejected, and a source-changing update clears any prior attestation. The IDL and source archive were uploaded to Logos Storage and their real CIDs written on-chain. A clean rebuild reproduced the deployed program ID byte-for-byte.
 
@@ -26,7 +28,7 @@ The full lifecycle has been executed end-to-end against a local standalone seque
 - **License:** dual licensed under the MIT License and Apache License 2.0 (`LICENSE-MIT`, `LICENSE-APACHE`; crates and new source files declare `MIT OR Apache-2.0`).
 - **IDL:** [`registry-idl.json`](https://github.com/goldennftplatform-svg/proclaim/blob/master/registry-idl.json), generated from the SPEL annotations via `make idl`. The frozen upload copy has SHA-256 `ef4fddc41d098d8360f4685df15f0e7dee33a0ff8dbce65041603dfac8cc4ee1` and matches the checked-in IDL byte-for-byte.
 - **Status / evidence log:** [`LP0023.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/LP0023.md) records program IDs, PDAs, transaction hashes and CIDs.
-- **CI:** none yet (see Pending work).
+- **CI:** [`.github/workflows/ci.yml`](https://github.com/goldennftplatform-svg/proclaim/blob/master/.github/workflows/ci.yml) — fmt, clippy, Rust unit tests and JS tests on push/PR; real-sequencer E2E is manual only (see [Pending work](#pending-work)).
 
 ## Approach
 
@@ -82,7 +84,7 @@ Legend: `[x]` = met with evidence in the repo / on chain; `[ ]` = not yet met (p
 - [ ] **Platform support.** Linux verified. macOS, Windows and Android not yet covered (macOS is checked through Adoption). Pending.
 - [ ] **Logos Core Module built with `logos-module-builder` (`mkLogosModule`).** Pending (scaffold only).
 - [x] **IDL generated via SPEL; registry registered in itself.** `registry-idl.json` is generated from `#[lez_program]` annotations, and the registry's own program ID is registered as an entry ("LP-0023 Registry v5").
-- [ ] **E2E integration tests against a real sequencer in CI, green on default branch.** No CI workflows yet. Pending.
+- [ ] **E2E integration tests against a real sequencer in CI, green on default branch.** A CI workflow now runs fmt, clippy, Rust unit tests and JS tests on every push/PR ([`docs/CI.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CI.md)), but the real-sequencer E2E job is manual and only a read smoke test because no always-on sequencer or dedicated wallet is available. Still pending.
 - [x] **README documents setup, program ID and step-by-step CLI / module usage.** [`README.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/README.md) and [`LP0023.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/LP0023.md) do so for the localnet deployment; the testnet 0.4 program ID is pending.
 - [x] **SDK worked example resolving a program ID to metadata and IDL.** [`docs/INTEGRATION.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/INTEGRATION.md) and the JS client README.
 
@@ -126,6 +128,12 @@ The workspace is split into shared types, guest, SDK, FFI, examples, HTTP API, J
 - [Integration tutorial](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/INTEGRATION.md)
 - [Roadmap — Phase A–E](https://github.com/goldennftplatform-svg/proclaim/blob/master/ROADMAP.md)
 - [Performance and cost notes](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/PERFORMANCE.md)
+- [CI workflow and honest E2E status](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CI.md)
+- [Clean-environment demo script](https://github.com/goldennftplatform-svg/proclaim/blob/master/scripts/demo-clean.sh) — regenerates the IDL, runs both test suites and optionally performs read-only sequencer/API checks.
+- [LP-0023 spec / PR status re-check](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/SPEC-RECHECK.md)
+- [Module packaging / catalog research](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/MODULE-PACKAGING-RESEARCH.md)
+- [Adoption tracker with honest current counts](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/adoption/ADOPTION_TRACKER.md)
+- [Third-party module starter](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/adoption/THIRD_PARTY_MODULE_STARTER.md) and [builder-hub post draft](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/adoption/BUILDER_HUB_POST.md)
 - [Clean-room source verifier](https://github.com/goldennftplatform-svg/proclaim/blob/master/scripts/verify-source.sh)
 - [QtRO storage upload client](https://github.com/goldennftplatform-svg/proclaim/blob/master/tools/qtro_storage_upload.py) and [isolated host launcher](https://github.com/goldennftplatform-svg/proclaim/blob/master/tools/launch_storage_host.sh)
 - [HTTP API](https://github.com/goldennftplatform-svg/proclaim/tree/master/registry-api) and [JS client](https://github.com/goldennftplatform-svg/proclaim/tree/master/clients/js)
@@ -150,8 +158,8 @@ On-chain records (localnet standalone sequencer):
 2. Make uploaded CIDs network-retrievable (run a publicly reachable storage node seeded with the IDL and source), then prove retrieval by an independent node.
 3. Measure and document cycle counts for `register` and `update` using LEZ `cycle_bench`, filling in `docs/PERFORMANCE.md`.
 4. Deploy to Logos testnet 0.4 once available; record the program ID and rerun the lifecycle and verification there.
-5. Package `ui/registry/` with `logos-module-builder`, publish it to a `logos-modules-release-base` catalog, and include the `logos-repo.json` URL.
-6. Add CI with a real-sequencer E2E job, green on the default branch; extend platform coverage.
+5. Package `ui/registry/` with `logos-module-builder`, publish it to a `logos-modules-release-base` catalog, and include the `logos-repo.json` URL. Note: the builder's current QML path uses `mkLogosQmlModule` (`ui_qml`), while the prize text names `mkLogosModule`; see [`docs/MODULE-PACKAGING-RESEARCH.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/MODULE-PACKAGING-RESEARCH.md) for the verified commands and this open question.
+6. Make the real-sequencer E2E job automatic and green on the default branch (host-side CI is already in place); extend platform coverage.
 7. Adoption: recruit 5 independent third-party UI modules, drive 50 registrations from 20 independent authors over ≥2 months (≥10/month), reach 20 verified source claims, collect 20 Discord and 20 X testimonials, and include macOS users/installs.
 
 ## Terms & Conditions

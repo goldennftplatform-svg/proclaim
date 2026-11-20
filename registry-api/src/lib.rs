@@ -29,7 +29,9 @@ pub struct RegistryClientError {
 
 impl RegistryClientError {
     pub fn new(message: impl Into<String>) -> Self {
-        Self { message: message.into() }
+        Self {
+            message: message.into(),
+        }
     }
 
     pub fn message(&self) -> &str {
@@ -55,7 +57,10 @@ fn err(message: impl Into<String>) -> RegistryClientError {
 pub fn program_id_from_hex(s: &str) -> RegistryClientResult<ProgramId> {
     let s = s.trim_start_matches("0x");
     if s.len() != 64 {
-        return Err(err(format!("program id hex must be 64 chars, got {}", s.len())));
+        return Err(err(format!(
+            "program id hex must be 64 chars, got {}",
+            s.len()
+        )));
     }
     let mut pid = [0u32; 8];
     for (i, chunk) in s.as_bytes().chunks(8).enumerate() {
@@ -129,7 +134,10 @@ pub async fn fetch_account_data(wc: &WalletCore, id: AccountId) -> RegistryClien
 }
 
 /// Fetch and Borsh-decode the global registry index.
-pub async fn fetch_index(wc: &WalletCore, program_id: &ProgramId) -> RegistryClientResult<RegistryIndex> {
+pub async fn fetch_index(
+    wc: &WalletCore,
+    program_id: &ProgramId,
+) -> RegistryClientResult<RegistryIndex> {
     let id = index_pda(program_id)?;
     let bytes = fetch_account_data(wc, id).await?;
     RegistryIndex::from_account_data(&bytes)
@@ -222,10 +230,14 @@ impl RegistryService {
         std::thread::Builder::new()
             .name("registry-wallet".to_string())
             .spawn(move || {
-                let runtime = match tokio::runtime::Builder::new_current_thread().enable_all().build() {
+                let runtime = match tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                {
                     Ok(rt) => rt,
                     Err(e) => {
-                        let _ = ready_tx.send(Err(err(format!("failed to build wallet runtime: {}", e))));
+                        let _ = ready_tx
+                            .send(Err(err(format!("failed to build wallet runtime: {}", e))));
                         return;
                     }
                 };
@@ -233,7 +245,8 @@ impl RegistryService {
                     let wc = match WalletCore::from_env().await {
                         Ok(wc) => wc,
                         Err(e) => {
-                            let _ = ready_tx.send(Err(err(format!("failed to init wallet: {}", e))));
+                            let _ =
+                                ready_tx.send(Err(err(format!("failed to init wallet: {}", e))));
                             return;
                         }
                     };
@@ -243,10 +256,18 @@ impl RegistryService {
                             WorkerRequest::Index { program_id, reply } => {
                                 let _ = reply.send(fetch_index(&wc, &program_id).await);
                             }
-                            WorkerRequest::Entries { program_id, index, reply } => {
+                            WorkerRequest::Entries {
+                                program_id,
+                                index,
+                                reply,
+                            } => {
                                 let _ = reply.send(fetch_entries(&wc, &program_id, &index).await);
                             }
-                            WorkerRequest::Entry { program_id, key, reply } => {
+                            WorkerRequest::Entry {
+                                program_id,
+                                key,
+                                reply,
+                            } => {
                                 let _ = reply.send(fetch_entry(&wc, &program_id, &key).await);
                             }
                         }
@@ -267,7 +288,8 @@ impl RegistryService {
             .send(WorkerRequest::Index { program_id, reply })
             .await
             .map_err(|_| err("wallet worker is unavailable"))?;
-        rx.await.map_err(|e| err(format!("wallet worker dropped the request: {}", e)))?
+        rx.await
+            .map_err(|e| err(format!("wallet worker dropped the request: {}", e)))?
     }
 
     pub async fn entries(
@@ -277,10 +299,15 @@ impl RegistryService {
     ) -> RegistryClientResult<Vec<RegistryEntry>> {
         let (reply, rx) = oneshot::channel();
         self.tx
-            .send(WorkerRequest::Entries { program_id, index, reply })
+            .send(WorkerRequest::Entries {
+                program_id,
+                index,
+                reply,
+            })
             .await
             .map_err(|_| err("wallet worker is unavailable"))?;
-        rx.await.map_err(|e| err(format!("wallet worker dropped the request: {}", e)))?
+        rx.await
+            .map_err(|e| err(format!("wallet worker dropped the request: {}", e)))?
     }
 
     pub async fn entry(
@@ -290,9 +317,14 @@ impl RegistryService {
     ) -> RegistryClientResult<RegistryEntry> {
         let (reply, rx) = oneshot::channel();
         self.tx
-            .send(WorkerRequest::Entry { program_id, key, reply })
+            .send(WorkerRequest::Entry {
+                program_id,
+                key,
+                reply,
+            })
             .await
             .map_err(|_| err("wallet worker is unavailable"))?;
-        rx.await.map_err(|e| err(format!("wallet worker dropped the request: {}", e)))?
+        rx.await
+            .map_err(|e| err(format!("wallet worker dropped the request: {}", e)))?
     }
 }

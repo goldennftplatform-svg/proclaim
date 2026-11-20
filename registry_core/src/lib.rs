@@ -5,7 +5,16 @@
 use serde::{Deserialize, Serialize};
 
 /// On-chain registry record, mirrored from `methods/guest/src/bin/registry.rs`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, borsh::BorshSerialize, borsh::BorshDeserialize)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    borsh::BorshSerialize,
+    borsh::BorshDeserialize,
+)]
 pub struct RegistryEntry {
     /// 32-byte program ID (also the PDA seed).
     pub program_id: [u8; 32],
@@ -42,7 +51,16 @@ pub struct RegistryEntry {
 }
 
 /// Global on-chain index of registered program IDs.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, borsh::BorshSerialize, borsh::BorshDeserialize)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    borsh::BorshSerialize,
+    borsh::BorshDeserialize,
+)]
 pub struct RegistryIndex {
     pub program_ids: Vec<[u8; 32]>,
 }
@@ -184,7 +202,11 @@ mod tests {
             } else {
                 String::new()
             },
-            evidence_cid: if verified_by.is_some() { "evidence".into() } else { String::new() },
+            evidence_cid: if verified_by.is_some() {
+                "evidence".into()
+            } else {
+                String::new()
+            },
         }
     }
 
@@ -207,7 +229,9 @@ mod tests {
 
     #[test]
     fn index_roundtrip() {
-        let index = RegistryIndex { program_ids: vec![[9; 32], [8; 32]] };
+        let index = RegistryIndex {
+            program_ids: vec![[9; 32], [8; 32]],
+        };
         let bytes = index.to_account_data().unwrap();
         assert_eq!(RegistryIndex::from_account_data(&bytes).unwrap(), index);
     }

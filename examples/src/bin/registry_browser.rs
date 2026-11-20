@@ -63,19 +63,33 @@ fn parse_args() -> Args {
             "-h" | "--help" => usage(),
             "--program-id" => {
                 i += 1;
-                a.program_id_hex = argv.get(i).cloned().unwrap_or_else(|| die("--program-id needs a value"));
+                a.program_id_hex = argv
+                    .get(i)
+                    .cloned()
+                    .unwrap_or_else(|| die("--program-id needs a value"));
             }
             "--name" => {
                 i += 1;
-                a.name = Some(argv.get(i).cloned().unwrap_or_else(|| die("--name needs a value")));
+                a.name = Some(
+                    argv.get(i)
+                        .cloned()
+                        .unwrap_or_else(|| die("--name needs a value")),
+                );
             }
             "--tag" => {
                 i += 1;
-                a.tags.push(argv.get(i).cloned().unwrap_or_else(|| die("--tag needs a value")));
+                a.tags.push(
+                    argv.get(i)
+                        .cloned()
+                        .unwrap_or_else(|| die("--tag needs a value")),
+                );
             }
             "--author" => {
                 i += 1;
-                let s = argv.get(i).cloned().unwrap_or_else(|| die("--author needs a value"));
+                let s = argv
+                    .get(i)
+                    .cloned()
+                    .unwrap_or_else(|| die("--author needs a value"));
                 a.authors.push(parse_key32(&s));
             }
             "--verified" => a.verified_only = true,
@@ -83,8 +97,14 @@ fn parse_args() -> Args {
             "--index-only" => a.index_only = true,
             "--limit" => {
                 i += 1;
-                let s = argv.get(i).cloned().unwrap_or_else(|| die("--limit needs a value"));
-                a.limit = Some(s.parse().unwrap_or_else(|_| die("--limit must be a number")));
+                let s = argv
+                    .get(i)
+                    .cloned()
+                    .unwrap_or_else(|| die("--limit needs a value"));
+                a.limit = Some(
+                    s.parse()
+                        .unwrap_or_else(|_| die("--limit must be a number")),
+                );
             }
             other => die(&format!("unknown argument: {}", other)),
         }
@@ -149,7 +169,10 @@ async fn main() {
     let program_id = registry_api::program_id_from_hex(&args.program_id_hex)
         .unwrap_or_else(|e| die(&e.to_string()));
 
-    eprintln!("registry program id : 0x{}", args.program_id_hex.trim_start_matches("0x"));
+    eprintln!(
+        "registry program id : 0x{}",
+        args.program_id_hex.trim_start_matches("0x")
+    );
     let idx_id = registry_api::index_pda(&program_id).unwrap_or_else(|e| die(&e.to_string()));
     eprintln!("index PDA           : {}", idx_id);
 
@@ -179,14 +202,18 @@ async fn main() {
     eprintln!("registered programs : {}", index.program_ids.len());
 
     if args.json && args.index_only {
-        let ids: Vec<String> = index.program_ids.iter().map(|k| to_base58(k)).collect();
+        let ids: Vec<String> = index.program_ids.iter().map(to_base58).collect();
         println!("{}", serde_json::to_string_pretty(&ids).unwrap());
         return;
     }
     if args.index_only {
-        println!("{:<52}  {}", "PROGRAM ID (base58)", "HEX");
+        println!("{:<52}  HEX", "PROGRAM ID (base58)");
         for k in &index.program_ids {
-            println!("{:<52}  0x{}", to_base58(k), k.iter().map(|b| format!("{:02x}", b)).collect::<String>());
+            println!(
+                "{:<52}  0x{}",
+                to_base58(k),
+                k.iter().map(|b| format!("{:02x}", b)).collect::<String>()
+            );
         }
         return;
     }
@@ -224,7 +251,11 @@ async fn main() {
         None => matched,
     };
 
-    eprintln!("matched entries     : {} (of {} decoded)", matched.len(), entries.len());
+    eprintln!(
+        "matched entries     : {} (of {} decoded)",
+        matched.len(),
+        entries.len()
+    );
 
     if args.json {
         let vals: Vec<serde_json::Value> = matched
@@ -236,8 +267,8 @@ async fn main() {
     }
 
     println!(
-        "{:<20} {:<8} {:<12} {:<12} {:<22} {:<4} {}",
-        "NAME", "VER", "PROGRAM", "AUTHOR", "TAGS", "VER", "DATE"
+        "{:<20} {:<8} {:<12} {:<12} {:<22} {:<4} DATE",
+        "NAME", "VER", "PROGRAM", "AUTHOR", "TAGS", "VER"
     );
     println!("{}", "-".repeat(110));
     for e in &matched {
@@ -248,7 +279,11 @@ async fn main() {
             short_b58(&e.program_id),
             short_b58(&e.author),
             truncate(&e.tags, 22),
-            if e.is_independently_verified() { "yes" } else { "-" },
+            if e.is_independently_verified() {
+                "yes"
+            } else {
+                "-"
+            },
             iso_time(e.timestamp),
         );
     }
