@@ -11,13 +11,17 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   CARGO_BUILD_JOBS: "2"
-  # Matches the local host build; required by the LEZ custom getrandom backend.
-  RUSTFLAGS: '--cfg getrandom_backend="custom"'
 
 jobs:
   rust:
     name: Rust — fmt, clippy, unit tests
     runs-on: ubuntu-24.04
+    env:
+      # Only our registry crates provide the custom getrandom backend. NEVER
+      # set this globally: third-party builds (logos-scaffold, LEZ's own
+      # sequencer_service) then fail to link with
+      # `undefined symbol: __getrandom_v03_custom`.
+      RUSTFLAGS: '--cfg getrandom_backend="custom"'
     steps:
       - uses: actions/checkout@v4
 
@@ -131,14 +135,11 @@ jobs:
           cargo +risc0 --version
 
       - name: Install logos-scaffold 0.5.0
-        env:
-          # The workspace-wide custom getrandom cfg is provided by the registry
-          # crates, not by logos-scaffold. Leaving it set here makes the linker
-          # fail with: undefined symbol `__getrandom_v03_custom`.
-          RUSTFLAGS: ""
         run: cargo install logos-scaffold --version 0.5.0 --locked
 
       - name: Verify committed IDL is reproducible
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="custom"'
         run: |
           cargo run --quiet --bin generate_idl > /tmp/e2e-registry-idl.json
           diff -u registry-idl.json /tmp/e2e-registry-idl.json
@@ -153,6 +154,8 @@ jobs:
           lgs test-node doctor --json | tee e2e-artifacts/test-node-doctor.json
 
       - name: Build guest locally and assert deployed program ID
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="custom"'
         run: |
           cargo +risc0 build --release \
             --manifest-path methods/guest/Cargo.toml \
@@ -167,6 +170,8 @@ jobs:
           test "$(tr -d '\r' < e2e-artifacts/program-id.txt | tail -n 1)" = "$REGISTRY_PROGRAM_ID"
 
       - name: Run full lifecycle against fresh sequencer
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="custom"'
         run: bash scripts/e2e-real-sequencer.sh
 
       - name: Upload E2E diagnostics
