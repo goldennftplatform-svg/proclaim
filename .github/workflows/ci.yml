@@ -165,6 +165,9 @@ jobs:
             --manifest-path methods/guest/Cargo.toml \
             --target riscv32im-risc0-zkvm-elf
           cargo build --release --manifest-path tools/make-bin/Cargo.toml
+          # make-bin uses fs::write, which does not create parent dirs. The
+          # docker/ dir exists in a local dev tree but not in a clean checkout.
+          mkdir -p methods/guest/target/riscv32im-risc0-zkvm-elf/docker
           tools/make-bin/target/release/make-bin \
             methods/guest/target/riscv32im-risc0-zkvm-elf/release/registry \
             methods/guest/target/riscv32im-risc0-zkvm-elf/docker/registry.bin
