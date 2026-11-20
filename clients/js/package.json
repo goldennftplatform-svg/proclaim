@@ -1,0 +1,33 @@
+{
+  "name": "@lp0023/registry-client",
+  "version": "0.1.0",
+  "description": "Dependency-free ESM client for the LP-0023 LEZ Program Registry JSON API",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT OR Apache-2.0",
+  "keywords": [
+    "lp0023",
+    "lez",
+    "registry",
+    "logos"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/*.test.js"
+  }
+}
