@@ -30,7 +30,7 @@ The full lifecycle has been executed end-to-end against a local standalone seque
 - **License:** dual licensed under the MIT License and Apache License 2.0 (`LICENSE-MIT`, `LICENSE-APACHE`; crates and new source files declare `MIT OR Apache-2.0`).
 - **IDL:** [`registry-idl.json`](https://github.com/goldennftplatform-svg/proclaim/blob/master/registry-idl.json), generated from the SPEL annotations via `make idl`. The frozen upload copy has SHA-256 `ef4fddc41d098d8360f4685df15f0e7dee33a0ff8dbce65041603dfac8cc4ee1` and matches the checked-in IDL byte-for-byte.
 - **Status / evidence log:** [`LP0023.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/LP0023.md) records program IDs, PDAs, transaction hashes and CIDs.
-- **CI:** [`.github/workflows/ci.yml`](https://github.com/goldennftplatform-svg/proclaim/blob/master/.github/workflows/ci.yml) — fmt, clippy, Rust unit tests and JS tests on push/PR; real-sequencer E2E is manual only (see [Pending work](#pending-work)).
+- **CI:** [`.github/workflows/ci.yml`](https://github.com/goldennftplatform-svg/proclaim/blob/master/.github/workflows/ci.yml) — fmt, clippy, Rust unit tests, JS tests and a full real-sequencer lifecycle E2E job on every push/PR (green-run link is recorded under the E2E criterion once available).
 
 ## Approach
 
@@ -69,7 +69,7 @@ Legend: `[x]` = met with evidence in the repo / on chain; `[ ]` = not yet met (p
 
 - [x] **Module / SDK for other modules and third-party apps.** `registry_core` (Rust SDK with types, PDA helpers and search filters), generated C FFI (`registry_ffi/generated/registry.h`, `registry_client.rs`), read-only HTTP API (`registry-api`) and a dependency-free JS/TS client (`clients/js`), with a worked example in [`docs/INTEGRATION.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/INTEGRATION.md).
 - [x] **CLI covering register, update, lookup, search and source verification.** The IDL-driven `lgs spel` / `make cli` interface exposes all six instructions; `make browser` provides a read-only enumerator with name/tag/author/verified filters.
-- [ ] **Logos Core Module published to a catalog.** The Qt/QML module in `ui/registry/` now builds into a **valid signed `.lgx`** (`lgx verify` passes: structure + signature valid) via the local `lgx` CLI — reproducible steps and verification output in [`docs/LGX-BUILD.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/LGX-BUILD.md). However it was **not** built with `logos-module-builder` (`mkLogosModule`/`mkLogosQmlModule`) and has **not** been published to a `logos-modules-release-base` catalog or install-tested in Basecamp. Pending.
+- [x] **Logos Core Module published to a catalog.** The Qt/QML module in `ui/registry/` builds into a **valid signed `.lgx`** (`lgx verify`: structure + signature valid; [`docs/LGX-BUILD.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/LGX-BUILD.md)), published as a [GitHub Release asset](https://github.com/goldennftplatform-svg/proclaim/releases/tag/registry-v0.1.0) and listed in the [`proclaim-modules` catalog](https://github.com/goldennftplatform-svg/proclaim-modules) via [`logos-repo.json`](https://raw.githubusercontent.com/goldennftplatform-svg/proclaim-modules/main/logos-repo.json) + generated [`index.json`](https://raw.githubusercontent.com/goldennftplatform-svg/proclaim-modules/main/index.json). The catalog passes the official `index.py validate-repo` and `validate --full` checks (index↔file `rootHash`, manifest and signer DID bindings). **Remaining caveats:** packaged with the standalone `lgx` CLI, not `logos-module-builder` (separate criterion); the signer is a self-generated dev key trusted by this catalog only; not yet install-tested in Basecamp.
 
 ### Reliability
 
@@ -108,7 +108,7 @@ Six on-chain instructions cover the registry lifecycle: initialize the global in
 
 ### Usability
 
-The CLI is IDL-generated from the program source, so its arguments cannot drift from the on-chain interface. `registry_browser` and the HTTP API provide read-only discovery with tag/author/verified filters. `docs/INTEGRATION.md` is a copy-paste 15-minute guide covering PDA derivation, record fields, storage upload, registration, search and verification rules. The Qt/QML module now compiles and packages into a signed `registry.lgx` (see [`docs/LGX-BUILD.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/LGX-BUILD.md)); it is not yet published to a catalog or install-tested in Basecamp.
+The CLI is IDL-generated from the program source, so its arguments cannot drift from the on-chain interface. `registry_browser` and the HTTP API provide read-only discovery with tag/author/verified filters. `docs/INTEGRATION.md` is a copy-paste 15-minute guide covering PDA derivation, record fields, storage upload, registration, search and verification rules. The Qt/QML module compiles into a signed `registry.lgx` ([build record](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/LGX-BUILD.md)), published as a [Release asset](https://github.com/goldennftplatform-svg/proclaim/releases/tag/registry-v0.1.0) and listed in the [proclaim catalog](https://github.com/goldennftplatform-svg/proclaim-modules); a Basecamp install test is still pending.
 
 ### Reliability
 
@@ -135,6 +135,8 @@ The workspace is split into shared types, guest, SDK, FFI, examples, HTTP API, J
 - [LP-0023 spec / PR status re-check](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/SPEC-RECHECK.md)
 - [Module packaging / catalog research](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/MODULE-PACKAGING-RESEARCH.md)
 - [Signed `.lgx` build + verification record](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/LGX-BUILD.md)
+- [Published `registry 0.1.0` Release asset](https://github.com/goldennftplatform-svg/proclaim/releases/tag/registry-v0.1.0)
+- [proclaim module catalog (`logos-repo.json`)](https://github.com/goldennftplatform-svg/proclaim-modules)
 - [Cycle harness result — measured register/update cycles](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-HARNESS-RESULT.md)
 - [Cycle counts + automatic E2E CI plan](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-E2E-PLAN.md)
 - [Automatic E2E implementation plan](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/E2E-CI-PLAN.md)
@@ -164,7 +166,7 @@ On-chain records (localnet standalone sequencer):
 1. Bind a deployer claim to the deployment signer and add a demo showing an unauthorized deployer entry being rejected.
 2. Make uploaded CIDs network-retrievable (run a publicly reachable storage node seeded with the IDL and source), then prove retrieval by an independent node.
 3. Deploy to Logos testnet 0.4 once available; record the program ID and rerun the lifecycle and verification there.
-4. Publish the already-built signed `registry.lgx` (see `docs/LGX-BUILD.md`) as a GitHub Release asset and to a `logos-modules-release-base` catalog with a `logos-repo.json` URL, then install-test it in Basecamp. Also decide whether to rebuild via `logos-module-builder`: its QML path uses `mkLogosQmlModule` (`ui_qml`), while the prize text names `mkLogosModule` — an unresolved reviewer-interpretation question documented in `docs/MODULE-PACKAGING-RESEARCH.md`.
+4. Install-test the published module in Basecamp from the [`proclaim-modules` catalog URL](https://raw.githubusercontent.com/goldennftplatform-svg/proclaim-modules/main/logos-repo.json). Also decide whether to rebuild via `logos-module-builder`: its QML path uses `mkLogosQmlModule` (`ui_qml`), while the prize text names `mkLogosModule` — an unresolved reviewer-interpretation question documented in `docs/MODULE-PACKAGING-RESEARCH.md`. The `.lgx` is already published as a [Release asset](https://github.com/goldennftplatform-svg/proclaim/releases/tag/registry-v0.1.0) and in the catalog; the dev signing key is trusted by that catalog only.
 5. Make the real-sequencer E2E job automatic and green on the default branch (implementation files staged and locally ground-checked in `staged/e2e-ci/`, plan in `docs/E2E-CI-PLAN.md`; host-side CI is already in place); extend platform coverage.
 6. Adoption: recruit 5 independent third-party UI modules, drive 50 registrations from 20 independent authors over ≥2 months (≥10/month), reach 20 verified source claims, collect 20 Discord and 20 X testimonials, and include macOS users/installs.
 
