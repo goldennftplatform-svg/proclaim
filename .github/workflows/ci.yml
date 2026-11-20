@@ -131,6 +131,11 @@ jobs:
           cargo +risc0 --version
 
       - name: Install logos-scaffold 0.5.0
+        env:
+          # The workspace-wide custom getrandom cfg is provided by the registry
+          # crates, not by logos-scaffold. Leaving it set here makes the linker
+          # fail with: undefined symbol `__getrandom_v03_custom`.
+          RUSTFLAGS: ""
         run: cargo install logos-scaffold --version 0.5.0 --locked
 
       - name: Verify committed IDL is reproducible
