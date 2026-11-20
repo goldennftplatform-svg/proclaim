@@ -1,0 +1,19 @@
+* Jhome/xps/logos-workiregistry/ui/registry/registry.lgx
+
+@ Home
+@ Desktop
+
+&, Download
+
+Documents
+A Music
+@ Pictures
+
+1 Movies
+
+Filter LGX Package (*.Igx)
+
+>
+
+Cancel
+
