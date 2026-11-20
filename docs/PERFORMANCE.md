@@ -37,31 +37,61 @@ independent of registry size.
 
 ## How to measure cycle counts
 
-The LEZ `cycle_bench` tool was not available in the development environment (no
-`cycle_bench` binary and no LEZ source tree locally), so no measured figures are
-claimed. To fill the table below:
+No figures are claimed yet. Two things are required: an **LEZ baseline** with the
+official tool, and a **proclaim-specific harness** for this program's
+`register`/`update` instructions. Both are described below; neither has produced
+a measured proclaim number, so the table stays `TBD`.
 
-1. Install the LEZ toolchain that provides `cycle_bench` (it ships with the LEZ
-   developer toolchain / `lgs` plugin set; check `lgs --help` after updating).
-2. Build the guest from the published source so the measured ELF is the deployed
-   one:
+### 1. Official LEZ baseline (built-in guests only — NOT proclaim cycles)
 
-   ```bash
-   source ~/.cargo/env
-   export RUSTFLAGS='--cfg getrandom_backend="custom"'
-   CARGO_BUILD_JOBS=2 cargo build --manifest-path methods/guest/Cargo.toml --release --target risc0
-   ```
+`cycle_bench` ships in the LEZ source tree. An earlier draft of this document
+used a `cycle_bench --program-id … --instruction … --iterations …` command; that
+command **does not exist**. The authoritative CLI (LEZ `dev`,
+`tools/cycle_bench/src/main.rs`) accepts only `--prove`, `--ppe` and
+`--exec-iters`, benchmarks a fixed list of built-in guests (`clock`, `fee`,
+`scripted`, `system_upgrader`, `sequencer_stake`), and cannot load an arbitrary
+deployed program ID. The documented invocations, for the v0.2.4 tag this project
+pins, are:
 
-3. Run the bench for each instruction against the local sequencer, using the
-   same account PDAs as `LP0023.md`:
+```bash
+git clone --branch v0.2.4 --depth 1 https://github.com/logos-blockchain/logos-execution-zone.git
+cd logos-execution-zone
+cargo run --release -p cycle_bench -- --exec-iters 50
+cargo run --release -p cycle_bench --features prove -- --prove
+cargo run --release -p cycle_bench --features ppe -- --prove --ppe
+cargo bench -p cycle_bench --features ppe --bench verify
+```
 
-   ```bash
-   cycle_bench --program-id 4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144 \
-     --instruction register --iterations 100
-   ```
+This writes `target/cycle_bench.json` and (version-dependently)
+`target/criterion/`. It reports `user_cycles`, `segments`, `exec_ms`, and with
+proving `total_cycles`, `prove_ms` and `proof_bytes`. These numbers are LEZ
+built-ins and are useful only as a baseline; they are **not** the registry's
+`register`/`update` cycles.
 
-4. Record the median and p95 cycles, the account state size used, and the tool
-   version, then commit the numbers here.
+### 2. Proclaim-specific harness (not yet implemented)
+
+Because `cycle_bench` cannot load program ID
+`4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144`, measuring
+the registry requires a small harness that executes the exact deployed R0BF
+artifact with the same fixtures as the on-chain transactions. The required
+shape is documented in [`docs/CYCLES-E2E-PLAN.md`](CYCLES-E2E-PLAN.md): load
+`methods/guest/target/riscv32im-risc0-zkvm-elf/docker/registry.bin`, assert the
+derived program ID, build root/entry/index fixtures for each instruction,
+execute with `risc0_zkvm::default_executor().execute(env, elf)`, discard a
+warm-up run, and report median/p95 `cycles()` plus `segments.len()` against a
+machine-readable artifact. Rebuild the ELF from published source first:
+
+```bash
+source ~/.cargo/env
+export PATH="$HOME/.risc0/bin:$PATH"
+export CARGO_BUILD_JOBS=2
+export RUSTFLAGS='--cfg getrandom_backend="custom"'
+cargo +risc0 build --release --manifest-path methods/guest/Cargo.toml \
+  --target riscv32im-risc0-zkvm-elf
+```
+
+Until that harness exists and its output is committed here, no registry cycle
+count is claimed. Do not infer cycles from the account-access table above.
 
 ## Measured cycle counts
 

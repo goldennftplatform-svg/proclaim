@@ -1513,7 +1513,7 @@ Item {
                             text: backend.busy ? "\u2026" : "Register"
                             enabled: !backend.busy
                             Layout.rightMargin: 24; Layout.alignment: Qt.AlignRight
-                            onClicked: backend.register(register_author_idf.text, register_keyf.text, register_namef.text, register_versionf.text, register_descriptionf.text, register_tagsf.text, register_idl_cidf.text, register_code_cidf.text, register_commitf.text, register_build_configf.text, register_timestampf.text, register_deployer_claimedf.checked)
+                            onClicked: backend.registerProgram(register_author_idf.text, register_keyf.text, register_namef.text, register_versionf.text, register_descriptionf.text, register_tagsf.text, register_idl_cidf.text, register_code_cidf.text, register_commitf.text, register_build_configf.text, register_timestampf.text, register_deployer_claimedf.checked)
                             background: Rectangle {
                                 color: parent.down ? Qt.darker(root.colPrimary, 1.2) : root.colPrimary
                                 radius: root.radius / 2

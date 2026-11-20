@@ -10,7 +10,9 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
       `registry_browser --name`, `/search?name=…`, `client.search({ name })`.
 - [x] Graceful IDL degradation: `idl_availability()` / `idlAvailability()` with
       unit tests (7 Rust + 8 JS passing).
-- [x] `docs/PERFORMANCE.md` cost model and `cycle_bench` procedure (numbers TBD).
+- [x] `docs/PERFORMANCE.md` cost model; cycle-measurement plan in
+      `docs/CYCLES-E2E-PLAN.md` (LEZ `cycle_bench` cannot load our program ID,
+      so a proclaim harness is needed; numbers TBD).
 - [x] Clean-room `verify-source.sh` reproduces the v5 program ID.
 - [x] Repo published with dual licenses, no secrets, reproducible-build docs.
 - [x] **QtRO storage client** → uploaded IDL + source, obtained real CIDs
@@ -30,8 +32,13 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
 - [ ] Repeat `verify-source.sh` + independent `mark-verified` on testnet.
 
 ## Phase C — Third-party UI modules (prize requires 5)
-- [ ] Package the generated `ui/registry/` module as an installable `.lgx` and
-      document the install path for Basecamp users.
+- [x] Build a **signed, verified** `registry.lgx` from `ui/registry/` with the
+      local `lgx` CLI (no Nix/Docker); fixes included the C++ `register`
+      keyword and preserving generated manifest hashes. Full record:
+      `docs/LGX-BUILD.md`.
+- [ ] Publish the `.lgx` as a GitHub Release asset + `logos-modules-release-base`
+      catalog (`logos-repo.json`), then install-test in Basecamp. Decide whether
+      to rebuild via `logos-module-builder` (`mkLogosModule`/`mkLogosQmlModule`).
 - [ ] Recruit 5 independent UI/module authors to consume the registry client
       (FFI header + `registry_core` SDK are the integration surface).
 - [ ] Track each module's repo + the registry entries it registers.
@@ -55,6 +62,9 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
       module starter, honest adoption tracker).
 - [x] Re-check the published LP-0023 spec and open PRs (`docs/SPEC-RECHECK.md`):
       no competing solution PR; #188/#189 spec/policy changes still unmerged.
+- [x] Verify testnet 0.4 readiness (`docs/TESTNET-0.4-READINESS.md`): 0.4 is
+      externally blocked (all endpoints `TBD`, only RCs, roadmap targets
+      30 Nov 2026). Port/deploy runbook recorded for when 0.4 is published.
 - [ ] Ensure every criterion in the LP-0023 spec maps to a linked artifact.
 - [ ] Public posting history / account history checks: keep all work in the
       published repo and public testnet, no manufactured volume.

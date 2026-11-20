@@ -150,7 +150,7 @@ void RegistryBackend::initIndex(const QString& authorityId) {
     });
 }
 
-void RegistryBackend::register(const QString& authorId, const QString& key, const QString& name, const QString& version, const QString& description, const QString& tags, const QString& idlCid, const QString& codeCid, const QString& commit, const QString& buildConfig, const QString& timestamp, bool deployerClaimed) {
+void RegistryBackend::registerProgram(const QString& authorId, const QString& key, const QString& name, const QString& version, const QString& description, const QString& tags, const QString& idlCid, const QString& codeCid, const QString& commit, const QString& buildConfig, const QString& timestamp, bool deployerClaimed) {
     QJsonObject args = baseArgs();
     args["author"] = authorId;
     args["key"] = key;

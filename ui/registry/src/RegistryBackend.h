@@ -64,7 +64,7 @@ public:
 
     // ── Instructions ──────────────────────────────────────────────────────
     Q_INVOKABLE void initIndex(const QString& authorityId);
-    Q_INVOKABLE void register(const QString& authorId, const QString& key, const QString& name, const QString& version, const QString& description, const QString& tags, const QString& idlCid, const QString& codeCid, const QString& commit, const QString& buildConfig, const QString& timestamp, bool deployerClaimed);
+    Q_INVOKABLE void registerProgram(const QString& authorId, const QString& key, const QString& name, const QString& version, const QString& description, const QString& tags, const QString& idlCid, const QString& codeCid, const QString& commit, const QString& buildConfig, const QString& timestamp, bool deployerClaimed);
     Q_INVOKABLE void update(const QString& authorId, const QString& key, const QString& version, const QString& description, const QString& tags, const QString& idlCid, const QString& codeCid, const QString& commit, const QString& buildConfig);
     Q_INVOKABLE void markVerified(const QString& verifierId, const QString& key, const QString& method, const QString& evidenceCid);
     Q_INVOKABLE void lookup(const QString& key);

@@ -4,6 +4,8 @@
 **Scope:** research only. No repository code, commits, pushes, releases, or tokens were touched.  
 **Method:** public GitHub raw files and GitHub contents/API endpoints, plus read-only inspection of `C:\Users\XPS\Downloads\GFD\stage\Makefile` and local LP-0023 solution/spec files. Unauthenticated GitHub code search was unavailable (`401`), so authoritative details were taken from repository READMEs, docs, templates, workflows, and raw files.
 
+> **Implementation update (2026-11-19):** the manual LGX path in point 3/4 below has now been carried out end-to-end. A signed `registry.lgx` was built locally with the `lgx` CLI (no Nix/Docker): Qt plugin + FFI compiled, `lgx create` → `lgx add` → metadata merge → `lgx keygen`/`lgx sign` → `lgx verify` (structure + signature valid). Two fixes were required: (a) a real C++ bug — `register` is a reserved keyword, renamed to `registerProgram` across header/impl/QML; (b) the manifest patch had to **merge** curated metadata into the `lgx`-generated manifest rather than replace it, or the generated content `hashes` were lost and verification failed with `Missing content hashes in manifest`. The full reproducible commands, verification output and honest caveats are in [`LGX-BUILD.md`](LGX-BUILD.md). This resolves research item 8 in §8 (`lgx` built from source; CMake path works without prebuilt assets) and the manual-path part of item 3 (manifest patch verified by `lgx verify`), but the **release-action sidecar/index checks remain untested** and the module is still **not** builder-generated, catalog-published, or install-tested — those remain pending.
+
 ---
 
 ## 1. Bottom line
