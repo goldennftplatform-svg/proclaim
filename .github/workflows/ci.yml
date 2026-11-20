@@ -2,18 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [master]
   pull_request:
   workflow_dispatch:
-    inputs:
-      run_e2e:
-        description: 'Run the real-sequencer E2E job (needs sequencer secrets)'
-        type: boolean
-        default: false
+
+permissions:
+  contents: read
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_BUILD_JOBS: 2
+  CARGO_BUILD_JOBS: "2"
   # Matches the local host build; required by the LEZ custom getrandom backend.
   RUSTFLAGS: '--cfg getrandom_backend="custom"'
 
@@ -58,38 +55,111 @@ jobs:
       - name: Run JS client tests
         run: node --test clients/js/test/registry.test.js
 
-  # Kept as a manual job: a real sequencer and a dedicated wallet config must be
-  # available. See docs/CI.md for the secrets and why this is not yet enabled on
-  # push/PR events.
   e2e:
-    name: E2E — real sequencer (manual)
-    if: github.event_name == 'workflow_dispatch' && inputs.run_e2e
+    name: E2E — real standalone sequencer
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     env:
       LEE_WALLET_HOME_DIR: ${{ github.workspace }}/.scaffold/wallet
+      NSSA_WALLET_HOME_DIR: ${{ github.workspace }}/.scaffold/wallet
+      LOGOS_SCAFFOLD_CACHE_ROOT: ${{ github.workspace }}/.cache/logos-scaffold
+      LOGOS_SCAFFOLD_QUIET: "1"
+      RUST_LOG: info
+      # LEZ documents this as skipping proof generation / disabling proof
+      # verification. This job tests lifecycle + reads, NOT proof verification.
+      RISC0_DEV_MODE: "1"
+      REGISTRY_API_ADDR: 127.0.0.1:3030
+      REGISTRY_PROGRAM_ID: 4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144
+      E2E_SEQUENCER_PORT: "3040"
+      E2E_CHANNEL_ID: 0101010101010101010101010101010101010101010101010101010101010101
+      # Metadata strings only. Logos Storage CIDs are not fetched by this job.
+      E2E_IDL_CID: ${{ vars.E2E_IDL_CID || 'zDv*8iXZ6U' }}
+      E2E_CODE_CID: ${{ vars.E2E_CODE_CID || 'zDv*yXuozL' }}
+      E2E_EVIDENCE_CID: ${{ vars.E2E_EVIDENCE_CID || 'zDv*8iXZ6U' }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Prepare artifacts directory
+        run: mkdir -p e2e-artifacts
 
-      - name: Cache Cargo artifacts
-        uses: Swatinem/rust-cache@v2
-
-      - name: Restore wallet configuration
-        env:
-          WALLET_HOME_B64: ${{ secrets.E2E_WALLET_HOME_B64 }}
+      - name: Install native dependencies
         run: |
-          if [ -z "$WALLET_HOME_B64" ]; then
-            echo '::error::E2E_WALLET_HOME_B64 secret is not set'
-            exit 1
-          fi
-          mkdir -p "$LEE_WALLET_HOME_DIR"
-          printf '%s' "$WALLET_HOME_B64" | base64 -d | tar -xz -C "$LEE_WALLET_HOME_DIR"
-          chmod -R go-rwx "$LEE_WALLET_HOME_DIR"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential clang libclang-dev libssl-dev pkg-config \
+            libpcsclite-dev curl git jq python3-dev
 
-      - name: Build read-only host tools
-        run: cargo build -p registry-examples --bin registry_browser
+      - name: Install Rust 1.94.0
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.94.0
 
-      - name: Read index from the real sequencer
-        run: ./target/debug/registry_browser --index-only
+      - name: Cache registry workspace build
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: e2e-registry
+
+      - name: Cache pinned LEZ/SPEL checkouts and circuits
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.LOGOS_SCAFFOLD_CACHE_ROOT }}
+          key: ${{ runner.os }}-logos-scaffold-${{ hashFiles('scaffold.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-logos-scaffold-
+
+      - name: Install RISC Zero local toolchain
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.risc0/bin:$PATH"
+          rzup install rust 1.94.1
+          rzup install r0vm 3.0.5
+          rzup install cargo-risczero 3.0.5
+          rustc --version
+          cargo --version
+          cargo +risc0 --version
+
+      - name: Install logos-scaffold 0.5.0
+        run: cargo install logos-scaffold --version 0.5.0 --locked
+
+      - name: Verify committed IDL is reproducible
+        run: |
+          cargo run --quiet --bin generate_idl > /tmp/e2e-registry-idl.json
+          diff -u registry-idl.json /tmp/e2e-registry-idl.json
+
+      - name: Build pinned sequencer, wallet and spel binaries
+        run: |
+          lgs test-node pins --json | tee e2e-artifacts/test-node-pins.json
+          jq -e '.lez_ref == "47eba256479f6f785acbd138834340703cd03401"' \
+            e2e-artifacts/test-node-pins.json
+          lgs setup
+          lgs test-node prepare --json | tee e2e-artifacts/test-node-prepare.json
+          lgs test-node doctor --json | tee e2e-artifacts/test-node-doctor.json
+
+      - name: Build guest locally and assert deployed program ID
+        run: |
+          cargo +risc0 build --release \
+            --manifest-path methods/guest/Cargo.toml \
+            --target riscv32im-risc0-zkvm-elf
+          cargo build --release --manifest-path tools/make-bin/Cargo.toml
+          tools/make-bin/target/release/make-bin \
+            methods/guest/target/riscv32im-risc0-zkvm-elf/release/registry \
+            methods/guest/target/riscv32im-risc0-zkvm-elf/docker/registry.bin
+          lgs spel -- program-id \
+            methods/guest/target/riscv32im-risc0-zkvm-elf/docker/registry.bin \
+            --format hex | tee e2e-artifacts/program-id.txt
+          test "$(tr -d '\r' < e2e-artifacts/program-id.txt | tail -n 1)" = "$REGISTRY_PROGRAM_ID"
+
+      - name: Run full lifecycle against fresh sequencer
+        run: bash scripts/e2e-real-sequencer.sh
+
+      - name: Upload E2E diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-diagnostics
+          path: |
+            e2e-artifacts/
+            .scaffold/test-nodes/
+            .scaffold/wallet/
+          if-no-files-found: ignore

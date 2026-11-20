@@ -1,0 +1,10 @@
+[package]
+name = "make-bin"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-binfmt = "=3.0.5"
+risc0-zkos-v1compat = "2.2.3"
+
+[workspace]
