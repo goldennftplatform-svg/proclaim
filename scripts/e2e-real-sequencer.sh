@@ -3,10 +3,27 @@
 # Automatic LP-0023 lifecycle against a fresh LEZ standalone sequencer.
 set -euo pipefail
 
-PID="${REGISTRY_PROGRAM_ID:?set REGISTRY_PROGRAM_ID}"
-BASE58_PID="6FMaVQ6CmbAVNHgwsmmeBe5kiiKkQRFtqu4GUQ2vAf2T"
-INDEX_PDA="9mr5hePKo24ZHNztzVpuRND7PeAsR17yQ2M5HHPKcbw3"
-ENTRY_PDA="EP644ahCbBehPMV8krDKDnToxJwfaMGaKKa1NzDFcM6q"
+# Prefer the ID derived from the clean build by CI. The old constant was
+# produced at a different absolute checkout path and is not portable:
+# Cargo path-derived symbol strings change the loaded ELF header.
+PID="${E2E_PROGRAM_ID:-${REGISTRY_PROGRAM_ID:?set E2E_PROGRAM_ID or REGISTRY_PROGRAM_ID}}"
+printf '%s' "$PID" | grep -Eq '^[0-9a-f]{64}$' \
+  || { echo 'ERROR: program ID must be 64 lowercase hex chars' >&2; exit 1; }
+# Base58 of the 32-byte program ID, derived locally so browser/API assertions
+# follow the freshly built program instead of a stale constant.
+BASE58_PID="$(python3 - "$PID" <<'PY'
+import sys
+alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+hexid = sys.argv[1].rjust(64, '0')
+n = int(hexid, 16)
+out = ''
+while n:
+    n, r = divmod(n, 58)
+    out = alphabet[r] + out
+zeros = (len(hexid) - len(hexid.lstrip('0'))) // 2
+print('1' * zeros + out)
+PY
+)"
 CHANNEL_ID="${E2E_CHANNEL_ID:-0101010101010101010101010101010101010101010101010101010101010101}"
 PORT="${E2E_SEQUENCER_PORT:-3040}"
 BIN="methods/guest/target/riscv32im-risc0-zkvm-elf/docker/registry.bin"
@@ -108,8 +125,11 @@ grep -F "LP-0023 CI Registry" e2e-artifacts/spel-search.txt
 
 PDA_ENTRY=$(lgs spel -- pda entry --key "$PID" | tr -d '\r' | tail -n 1)
 PDA_INDEX=$(lgs spel -- pda index | tr -d '\r' | tail -n 1)
-test "$PDA_INDEX" = "$INDEX_PDA"
-test "$PDA_ENTRY" = "$ENTRY_PDA"
+# These PDAs are derived from the freshly built program ID. Previously they
+# were asserted against constants from a different build path, which could
+# never match a clean-runner rebuild.
+test -n "$PDA_ENTRY" && test -n "$PDA_INDEX"
+test "$PDA_ENTRY" != "$PDA_INDEX"
 
 lgs spel -- inspect "$PDA_INDEX" --type RegistryIndex \
   | tee e2e-artifacts/index-before-verify.txt
