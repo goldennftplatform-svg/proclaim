@@ -164,7 +164,11 @@ cargo build -p registry-examples --bin registry_browser
 
 step "Read-only HTTP API backed by the same wallet/sequencer"
 cargo build -p registry-api --bin registry-api
+# The API must read the program this run just deployed, not the stale
+# REGISTRY_PROGRAM_ID from CI env (a different build path). Otherwise the
+# index account is missing on the fresh sequencer and /index returns HTTP 500.
 REGISTRY_API_ADDR="${REGISTRY_API_ADDR:-127.0.0.1:3030}" \
+  REGISTRY_PROGRAM_ID="$PID" \
   ./target/debug/registry-api > e2e-artifacts/api.log 2>&1 &
 API_PID=$!
 
