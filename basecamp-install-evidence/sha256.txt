@@ -1,0 +1,9 @@
+source: /home/xps/logos-work/registry/ui/registry/registry.lgx
+1024036067711c06fac158be891422b362c71b7ebeefadcc1dd6c389d113c59e  /home/xps/logos-work/registry/ui/registry/registry.lgx
+installed:
+6e8a9b917d9031681d0dce846cf4cafaae5f32de5e90d65fa9bfbf5a26dbe5af  /home/xps/logos-work/basecamp-test/session/plugins/registry/Main.qml
+5b949fc50b52cadd1b680cd69fd4978b7cc4af1ab1714a30546b01d7d5a6aed7  /home/xps/logos-work/basecamp-test/session/plugins/registry/libregistry_ffi.so
+ed31822d994f7a7e1c880be95e1ef91f9851da126a2e8cc5dbeba1213b90eb09  /home/xps/logos-work/basecamp-test/session/plugins/registry/libregistry_plugin.so
+02672b3bb6482dc394c79bc4f2ce24d00a2cebec95d55adcfc4164db387cb581  /home/xps/logos-work/basecamp-test/session/plugins/registry/manifest.json
+3f0cc29886736aad72a014f6485a050b39b7fec8fb197066c6728dfe99d4e466  /home/xps/logos-work/basecamp-test/session/plugins/registry/manifest.sig
+abb35c616421af72198ad7c2aeeef38516f08f6a7afb2a728cf0068a8a712ddc  /home/xps/logos-work/basecamp-test/session/plugins/registry/variant
