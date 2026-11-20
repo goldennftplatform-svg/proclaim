@@ -1,0 +1,18 @@
+ELF SHA-256 asserted: 88716a6ba8c67e9623f3b2d5acf1d9c758ce071dbce391f1d9084628d72506c5
+program ID asserted: 4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144
+  warmup init_index: 1572.7 ms
+  warmup register: 1979.0 ms
+  warmup update: 1925.2 ms
+  warmup mark_verified: 1947.3 ms
+  warmup lookup: 2052.5 ms
+  warmup search: 1753.3 ms
+| Instruction | user cycles (best / median / p95 / mean±stdev) | segments | words | iters | N | Fixture |
+| --- | --- | --- | --- | --- | --- | --- |
+| `init_index` | 86937 / 86937 / 86937 / 86937.0±0.0 | 1 (min 1 max 1) | 1 | 20 | 8 | synthetic: empty index PDA + signer authority |
+| `register` | 319445 / 319445 / 319445 / 319445.0±0.0 | 1 (min 1 max 1) | 79 | 20 | 8 | synthetic: init entry PDA + N-entry index + signer author |
+| `update` | 226298 / 226298 / 226298 / 226298.0±0.0 | 1 (min 1 max 1) | 72 | 20 | 8 | synthetic: existing entry + signer author; source fields change |
+| `mark_verified` | 230009 / 230009 / 230009 / 230009.0±0.0 | 1 (min 1 max 1) | 49 | 20 | 8 | synthetic: existing entry + independent signer verifier |
+| `lookup` | 169398 / 169398 / 169398 / 169398.0±0.0 | 1 (min 1 max 1) | 33 | 20 | 8 | synthetic: existing entry PDA, read-only |
+| `search` | 164656 / 164656 / 164656 / 164656.0±0.0 | 1 (min 1 max 1) | 1 | 20 | 8 | synthetic: N-entry index PDA, read-only |
+
+JSON written to /mnt/c/Users/XPS/Downloads/GFD/staged/cycles-harness/cycles-report.json

@@ -1,8 +1,11 @@
 # Performance and cost notes
 
 This document records the on-chain cost model for the LP-0023 registry and the
-procedure for measuring it. **Cycle counts have not been measured yet** — the
-table at the end is deliberately left as `TBD` rather than filled with estimates.
+procedure for measuring it. **Cycle counts have been measured** with a
+proclaim-specific executor harness against the exact deployed R0BF artifact
+(program ID `4df7d539…65144`). See the [measured table](#measured-cycle-counts)
+and [`docs/CYCLES-HARNESS-RESULT.md`](CYCLES-HARNESS-RESULT.md) for provenance.
+`total_cycles` (po2/proving) is deliberately **not** claimed.
 
 ## What is on-chain
 
@@ -37,10 +40,11 @@ independent of registry size.
 
 ## How to measure cycle counts
 
-No figures are claimed yet. Two things are required: an **LEZ baseline** with the
-official tool, and a **proclaim-specific harness** for this program's
-`register`/`update` instructions. Both are described below; neither has produced
-a measured proclaim number, so the table stays `TBD`.
+Two approaches are described below. The official **LEZ baseline** tool measures
+only built-in guests and cannot load this program ID; the **proclaim-specific
+harness** has now produced the measured numbers in the
+[table at the end](#measured-cycle-counts). LEZ `cycle_bench` output is a
+baseline, not a proclaim measurement.
 
 ### 1. Official LEZ baseline (built-in guests only — NOT proclaim cycles)
 
@@ -68,7 +72,7 @@ proving `total_cycles`, `prove_ms` and `proof_bytes`. These numbers are LEZ
 built-ins and are useful only as a baseline; they are **not** the registry's
 `register`/`update` cycles.
 
-### 2. Proclaim-specific harness (not yet implemented)
+### 2. Proclaim-specific harness (implemented — measured below)
 
 Because `cycle_bench` cannot load program ID
 `4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144`, measuring
@@ -90,18 +94,32 @@ cargo +risc0 build --release --manifest-path methods/guest/Cargo.toml \
   --target riscv32im-risc0-zkvm-elf
 ```
 
-Until that harness exists and its output is committed here, no registry cycle
-count is claimed. Do not infer cycles from the account-access table above.
+That harness now exists and was run successfully; full commands, the exact
+fixture shapes and the machine-readable output are in
+[`docs/CYCLES-HARNESS-RESULT.md`](CYCLES-HARNESS-RESULT.md) and
+`staged/cycles-harness/cycles-report.json`. Do not infer cycles from the
+account-access table above — only measured values are reported below.
 
 ## Measured cycle counts
 
-> **Pending.** Do not infer figures from the account counts above.
+Measured on 2026-11-20 UTC with `risc0-zkvm 3.0.5`
+`default_executor().execute(env, &r0bf_bytes)` (in-process; no `r0vm`), against
+the exact deployed artifact. Values are `SessionInfo::cycles()` (user cycles,
+**not** po2/proving totals). Fixtures are synthetic (`N=8`, fixed strings/CIDs),
+20 samples after 1 discarded warm-up, stdev 0 across samples, 1 segment each.
+Program ID and ELF SHA-256 were asserted before measuring. Full provenance:
+[`docs/CYCLES-HARNESS-RESULT.md`](CYCLES-HARNESS-RESULT.md).
 
-| Instruction | Median cycles | p95 cycles | Iterations | Tool version | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `init_index` | TBD | TBD | TBD | TBD | One-time setup |
-| `register` | TBD | TBD | TBD | TBD | Depends on index length `N` |
-| `update` | TBD | TBD | TBD | TBD | |
-| `mark_verified` | TBD | TBD | TBD | TBD | |
-| `lookup` | TBD | TBD | TBD | TBD | Read-only |
-| `search` | TBD | TBD | TBD | TBD | Read-only, index account only |
+| Instruction | Median = min = p95 cycles | Segments | Iterations | Notes |
+| --- | --- | --- | --- | --- |
+| `init_index` | 86,937 | 1 | 20 | One-time setup; empty index PDA |
+| `register` | **319,445** | 1 | 20 | Depends on index length `N`; append path with `N=8` |
+| `update` | **226,298** | 1 | 20 | Existing entry + author signer |
+| `mark_verified` | 230,009 | 1 | 20 | Existing entry + independent verifier |
+| `lookup` | 169,398 | 1 | 20 | Read-only |
+| `search` | 164,656 | 1 | 20 | Read-only, index account only |
+
+**Not measured:** `total_cycles` (po2/proving cycles), prove time and proof
+size — this was an execution-only run, so the harness reports `null` rather than
+fabricating a figure. Do not treat these numbers as universal costs for every
+payload; they are valid for the fixed fixture shapes recorded in the harness.

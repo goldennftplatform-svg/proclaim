@@ -78,7 +78,7 @@ Legend: `[x]` = met with evidence in the repo / on chain; `[ ]` = not yet met (p
 
 ### Performance
 
-- [ ] **Cycle counts for register and update.** Not yet measured. The cost model and per-instruction account accesses are in [`docs/PERFORMANCE.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/PERFORMANCE.md), and the measurement plan — including the correction that LEZ `cycle_bench` cannot load an arbitrary program ID and needs a proclaim-specific harness — is in [`docs/CYCLES-E2E-PLAN.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-E2E-PLAN.md). The results table stays `TBD` rather than estimated. Pending.
+- [x] **Cycle counts for register and update.** Measured against the exact deployed R0BF artifact (program ID `4df7d539…65144`, ELF SHA-256 `88716a6b…2506c5`) with a proclaim-specific executor harness that asserts both before measuring. **`register`: 319,445 user cycles; `update`: 226,298** (also `init_index` 86,937, `mark_verified` 230,009, `lookup` 169,398, `search` 164,656; 20 samples, 1 segment each). LEZ `cycle_bench` cannot load an arbitrary program ID, hence the custom harness — full commands, fixtures and provenance in [`docs/CYCLES-HARNESS-RESULT.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-HARNESS-RESULT.md) and the table in [`docs/PERFORMANCE.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/PERFORMANCE.md). Caveats: synthetic fixed-size fixtures; po2/proving totals not measured (reported `null`, not fabricated).
 
 ### Supportability
 
@@ -104,7 +104,7 @@ Legend: `[x]` = met with evidence in the repo / on chain; `[ ]` = not yet met (p
 
 ### Functionality
 
-Six on-chain instructions cover the registry lifecycle: initialize the global index, register an entry, author-only update, independent verification, and two read paths. Clients derive an entry PDA from a program ID and enumerate the global index for search. SDK, CLI, HTTP API, JS client, FFI header and a reproducible-build verifier are provided. Name and author search, and graceful handling of unusable IDL pointers, are covered by unit tests. Limitations: no authorship transfer, no cryptographic deployer-claim binding yet, no measured cycle counts, no testnet-0.4 deployment, and no automatic real-sequencer E2E in CI yet.
+Six on-chain instructions cover the registry lifecycle: initialize the global index, register an entry, author-only update, independent verification, and two read paths. Clients derive an entry PDA from a program ID and enumerate the global index for search. SDK, CLI, HTTP API, JS client, FFI header and a reproducible-build verifier are provided. Name and author search, and graceful handling of unusable IDL pointers, are covered by unit tests. Cycle counts are measured (`register` 319,445, `update` 226,298 user cycles; [result](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-HARNESS-RESULT.md)). Limitations: no authorship transfer, no cryptographic deployer-claim binding yet, no testnet-0.4 deployment, no po2/proving totals, and no automatic real-sequencer E2E in CI yet.
 
 ### Usability
 
@@ -116,7 +116,7 @@ Authorization is enforced on-chain: only the original author can update; verific
 
 ### Performance
 
-On-chain writes are bounded to metadata and pointers. The account-access model is documented in [`docs/PERFORMANCE.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/PERFORMANCE.md); measured cycle counts are still pending because LEZ `cycle_bench` cannot load an arbitrary program ID and a proclaim-specific harness has not been implemented (plan: [`docs/CYCLES-E2E-PLAN.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-E2E-PLAN.md)). Off-chain search reads a single index account and derives/fetches entry accounts, so query cost scales linearly with the number of entries and requires no indexer service.
+On-chain writes are bounded to metadata and pointers. The account-access model and the measured cycle counts (`register` 319,445, `update` 226,298 user cycles) are in [`docs/PERFORMANCE.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/PERFORMANCE.md); LEZ `cycle_bench` cannot load an arbitrary program ID, so a [proclaim-specific harness](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-HARNESS-RESULT.md) executes the exact deployed artifact. Off-chain search reads a single index account and derives/fetches entry accounts, so query cost scales linearly with the number of entries and requires no indexer service.
 
 ### Supportability
 
@@ -135,7 +135,9 @@ The workspace is split into shared types, guest, SDK, FFI, examples, HTTP API, J
 - [LP-0023 spec / PR status re-check](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/SPEC-RECHECK.md)
 - [Module packaging / catalog research](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/MODULE-PACKAGING-RESEARCH.md)
 - [Signed `.lgx` build + verification record](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/LGX-BUILD.md)
+- [Cycle harness result — measured register/update cycles](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-HARNESS-RESULT.md)
 - [Cycle counts + automatic E2E CI plan](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/CYCLES-E2E-PLAN.md)
+- [Automatic E2E implementation plan](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/E2E-CI-PLAN.md)
 - [Testnet 0.4 readiness and port/deploy runbook](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/TESTNET-0.4-READINESS.md)
 - [Adoption tracker with honest current counts](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/adoption/ADOPTION_TRACKER.md)
 - [Third-party module starter](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/adoption/THIRD_PARTY_MODULE_STARTER.md) and [builder-hub post draft](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/adoption/BUILDER_HUB_POST.md)
@@ -161,11 +163,10 @@ On-chain records (localnet standalone sequencer):
 
 1. Bind a deployer claim to the deployment signer and add a demo showing an unauthorized deployer entry being rejected.
 2. Make uploaded CIDs network-retrievable (run a publicly reachable storage node seeded with the IDL and source), then prove retrieval by an independent node.
-3. Measure and document cycle counts for `register` and `update`. LEZ `cycle_bench` cannot load an arbitrary program ID, so this needs a proclaim-specific executor harness; the plan is in `docs/CYCLES-E2E-PLAN.md` and the table in `docs/PERFORMANCE.md` stays `TBD` until measured.
-4. Deploy to Logos testnet 0.4 once available; record the program ID and rerun the lifecycle and verification there.
-5. Publish the already-built signed `registry.lgx` (see `docs/LGX-BUILD.md`) as a GitHub Release asset and to a `logos-modules-release-base` catalog with a `logos-repo.json` URL, then install-test it in Basecamp. Also decide whether to rebuild via `logos-module-builder`: its QML path uses `mkLogosQmlModule` (`ui_qml`), while the prize text names `mkLogosModule` — an unresolved reviewer-interpretation question documented in `docs/MODULE-PACKAGING-RESEARCH.md`.
-6. Make the real-sequencer E2E job automatic and green on the default branch (host-side CI is already in place); extend platform coverage.
-7. Adoption: recruit 5 independent third-party UI modules, drive 50 registrations from 20 independent authors over ≥2 months (≥10/month), reach 20 verified source claims, collect 20 Discord and 20 X testimonials, and include macOS users/installs.
+3. Deploy to Logos testnet 0.4 once available; record the program ID and rerun the lifecycle and verification there.
+4. Publish the already-built signed `registry.lgx` (see `docs/LGX-BUILD.md`) as a GitHub Release asset and to a `logos-modules-release-base` catalog with a `logos-repo.json` URL, then install-test it in Basecamp. Also decide whether to rebuild via `logos-module-builder`: its QML path uses `mkLogosQmlModule` (`ui_qml`), while the prize text names `mkLogosModule` — an unresolved reviewer-interpretation question documented in `docs/MODULE-PACKAGING-RESEARCH.md`.
+5. Make the real-sequencer E2E job automatic and green on the default branch (implementation files staged and locally ground-checked in `staged/e2e-ci/`, plan in `docs/E2E-CI-PLAN.md`; host-side CI is already in place); extend platform coverage.
+6. Adoption: recruit 5 independent third-party UI modules, drive 50 registrations from 20 independent authors over ≥2 months (≥10/month), reach 20 verified source claims, collect 20 Discord and 20 X testimonials, and include macOS users/installs.
 
 ## Terms & Conditions
 

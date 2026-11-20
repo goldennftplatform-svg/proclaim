@@ -1,0 +1,26 @@
+[package]
+name = "cycles-harness"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Standalone proclaim-specific R0BF guest cycle-count harness (LP-0023)"
+
+[dependencies]
+anyhow = "1"
+borsh = { version = "1.5", features = ["derive"] }
+getrandom = "0.4.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+
+# `prove` is required: without it, risc0-zkvm 3.0.5's `default_executor()`
+# selects ExternalProver and shells out to `r0vm`, which is not installed here.
+# With `prove`, it selects the in-process LocalProver (source verified in
+# risc0-zkvm-3.0.5/src/host/client/prove/mod.rs::default_executor).
+risc0-zkvm = { version = "=3.0.5", default-features = false, features = ["std", "prove"] }
+
+# Same pinned LEZ core that the guest (`nssa_core`) uses. Mirrors the guest's
+# exact input structs: ProgramId=[u32;8], AccountWithMetadata, InstructionData.
+nssa_core = { git = "https://github.com/logos-blockchain/logos-execution-zone.git", tag = "v0.2.4", package = "lee_core" }
+
+[workspace]

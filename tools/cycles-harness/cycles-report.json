@@ -1,0 +1,160 @@
+{
+  "elf": {
+    "format": "R0BF ProgramBinary (risc0-binfmt 3.0.5)",
+    "path": "/home/xps/logos-work/registry/methods/guest/target/riscv32im-risc0-zkvm-elf/docker/registry.bin",
+    "sha256": "88716a6ba8c67e9623f3b2d5acf1d9c758ce071dbce391f1d9084628d72506c5",
+    "size_bytes": 463236
+  },
+  "environment": {
+    "arch": "x86_64",
+    "cpu_model": "Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz",
+    "host_profile": "dev (host debug build; guest cycle counts are VM-deterministic)",
+    "kernel": "Linux DESKTOP-JJMVNMN 6.18.58.1-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Tue Oct 27 00:24:11 UTC 2026 x86_64 GNU/Linux",
+    "os": "linux"
+  },
+  "generated_at_utc": "2026-11-20T03:01:40Z",
+  "method": {
+    "best_definition": "minimum of sampled SessionInfo::cycles() values",
+    "call": "default_executor().execute(env, &r0bf_bytes)",
+    "chained_calls": "none: all six guest handlers return SpelOutput::execute(post_states, vec![])",
+    "cycles_source": "SessionInfo::cycles() (sum of segment user cycles, no po2 padding)",
+    "executor": "risc0_zkvm::default_executor (LocalProver in-process; prove feature enabled)",
+    "fixtures_are_synthetic": true,
+    "fixtures_note": "All account IDs, author/verifier keys, strings and CIDs are synthetic fixtures; no real on-chain state or private keys are used.",
+    "index_length_n": 8,
+    "iterations": 20,
+    "median_definition": "upper median: sorted[n/2] for 0-based n",
+    "p95_definition": "nearest-rank: sorted[ceil(0.95*n)-1]",
+    "segments_source": "SessionInfo::segments.len()",
+    "stdev_definition": "population standard deviation over sampled SessionInfo::cycles() values",
+    "total_cycles_po2": null,
+    "total_cycles_po2_note": "Not measured: this execution-only run does not invoke a Prover. No po2/proving number is fabricated.",
+    "warmup_discarded": 1
+  },
+  "program_id": {
+    "computed": "4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144",
+    "expected": "4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144",
+    "match": true
+  },
+  "results": [
+    {
+      "cycles": {
+        "max": 86937,
+        "mean": 86937.0,
+        "median": 86937,
+        "min": 86937,
+        "p95": 86937,
+        "stdev": 0.0
+      },
+      "fixture_note": "synthetic: empty index PDA + signer authority",
+      "instruction": "init_index",
+      "instruction_words_len": 1,
+      "iterations": 20,
+      "segments_max": 1,
+      "segments_median": 1,
+      "segments_min": 1,
+      "warmup_discarded": 1
+    },
+    {
+      "cycles": {
+        "max": 319445,
+        "mean": 319445.0,
+        "median": 319445,
+        "min": 319445,
+        "p95": 319445,
+        "stdev": 0.0
+      },
+      "fixture_note": "synthetic: init entry PDA + N-entry index + signer author",
+      "instruction": "register",
+      "instruction_words_len": 79,
+      "iterations": 20,
+      "segments_max": 1,
+      "segments_median": 1,
+      "segments_min": 1,
+      "warmup_discarded": 1
+    },
+    {
+      "cycles": {
+        "max": 226298,
+        "mean": 226298.0,
+        "median": 226298,
+        "min": 226298,
+        "p95": 226298,
+        "stdev": 0.0
+      },
+      "fixture_note": "synthetic: existing entry + signer author; source fields change",
+      "instruction": "update",
+      "instruction_words_len": 72,
+      "iterations": 20,
+      "segments_max": 1,
+      "segments_median": 1,
+      "segments_min": 1,
+      "warmup_discarded": 1
+    },
+    {
+      "cycles": {
+        "max": 230009,
+        "mean": 230009.0,
+        "median": 230009,
+        "min": 230009,
+        "p95": 230009,
+        "stdev": 0.0
+      },
+      "fixture_note": "synthetic: existing entry + independent signer verifier",
+      "instruction": "mark_verified",
+      "instruction_words_len": 49,
+      "iterations": 20,
+      "segments_max": 1,
+      "segments_median": 1,
+      "segments_min": 1,
+      "warmup_discarded": 1
+    },
+    {
+      "cycles": {
+        "max": 169398,
+        "mean": 169398.0,
+        "median": 169398,
+        "min": 169398,
+        "p95": 169398,
+        "stdev": 0.0
+      },
+      "fixture_note": "synthetic: existing entry PDA, read-only",
+      "instruction": "lookup",
+      "instruction_words_len": 33,
+      "iterations": 20,
+      "segments_max": 1,
+      "segments_median": 1,
+      "segments_min": 1,
+      "warmup_discarded": 1
+    },
+    {
+      "cycles": {
+        "max": 164656,
+        "mean": 164656.0,
+        "median": 164656,
+        "min": 164656,
+        "p95": 164656,
+        "stdev": 0.0
+      },
+      "fixture_note": "synthetic: N-entry index PDA, read-only",
+      "instruction": "search",
+      "instruction_words_len": 1,
+      "iterations": 20,
+      "segments_max": 1,
+      "segments_median": 1,
+      "segments_min": 1,
+      "warmup_discarded": 1
+    }
+  ],
+  "schema": "proclaim-cycle-harness/1",
+  "toolchain": {
+    "guest_repo": "/home/xps/logos-work/registry",
+    "guest_repo_commit": "383afbee77e22ae9a1bcda06cc2ba7624d63c1d8",
+    "lee_core_git_rev": "47eba256479f6f785acbd138834340703cd03401",
+    "lee_core_git_tag": "v0.2.4",
+    "risc0_binfmt_locked": "3.0.5; transitive risc0-binfmt 3.0.6 was compiled by cargo",
+    "risc0_zkvm": "=3.0.5 (default-features=false, features=std,prove)",
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+    "spel_framework_git_tag": "v0.7.0 (guest build pin)"
+  }
+}

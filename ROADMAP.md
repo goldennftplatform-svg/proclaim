@@ -10,9 +10,10 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
       `registry_browser --name`, `/search?name=…`, `client.search({ name })`.
 - [x] Graceful IDL degradation: `idl_availability()` / `idlAvailability()` with
       unit tests (7 Rust + 8 JS passing).
-- [x] `docs/PERFORMANCE.md` cost model; cycle-measurement plan in
-      `docs/CYCLES-E2E-PLAN.md` (LEZ `cycle_bench` cannot load our program ID,
-      so a proclaim harness is needed; numbers TBD).
+- [x] `docs/PERFORMANCE.md` cost model with **measured** cycles: `register`
+      319,445 / `update` 226,298 user cycles (plus 4 other instructions), from
+      the proclaim harness in `docs/CYCLES-HARNESS-RESULT.md`. LEZ `cycle_bench`
+      cannot load our program ID; po2/proving totals not measured.
 - [x] Clean-room `verify-source.sh` reproduces the v5 program ID.
 - [x] Repo published with dual licenses, no secrets, reproducible-build docs.
 - [x] **QtRO storage client** → uploaded IDL + source, obtained real CIDs
@@ -56,6 +57,11 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
       early-draft pattern. Not yet opened in `logos-co/lambda-prize`.
 - [x] CI workflow with fmt/clippy/unit tests on push/PR (`.github/workflows/ci.yml`);
       manual real-sequencer E2E job documented in `docs/CI.md`.
+- [ ] Automatic real-sequencer E2E on every push: implementation files are
+      staged and locally ground-checked (`staged/e2e-ci/`, plan in
+      `docs/E2E-CI-PLAN.md`), but NOT yet applied to the repo and NOT yet proven
+      by a green default-branch GHA run. Do not mark this complete until a
+      successful run is linked.
 - [x] Clean-environment demo script (`scripts/demo-clean.sh`) with offline and
       read-only online modes.
 - [x] Adoption outreach kit in `docs/adoption/` (builder-hub post, third-party

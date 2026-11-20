@@ -5,7 +5,14 @@ commit, push, or use tokens. It is written for program ID:
 
 `4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144`
 
-Two LP-0023 criteria are still open:
+> **Update (2026-11-20):** item 1 below is now **closed** — the harness was built
+> and run, producing real numbers (`register` 319,445, `update` 226,298 user
+> cycles). See [`CYCLES-HARNESS-RESULT.md`](CYCLES-HARNESS-RESULT.md) and
+> [`PERFORMANCE.md`](PERFORMANCE.md). Item 2 (automatic E2E) remains open;
+> implementation files are staged in `e2e-ci/` and the detailed plan is
+> [`E2E-CI-PLAN.md`](E2E-CI-PLAN.md).
+
+Two LP-0023 criteria were open when this plan was written:
 
 1. Documented on-chain/guest cycle counts for `register` and `update` (and the
    rest of the registry instructions).
