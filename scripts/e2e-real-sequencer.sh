@@ -125,7 +125,11 @@ lgs spel -- update --key "$PID" \
   --author "$AUTHOR"
 
 lgs spel -- search | tee e2e-artifacts/spel-search.txt
-grep -F "LP-0023 CI Registry" e2e-artifacts/spel-search.txt
+# `lgs spel -- search` prints transaction diagnostics, not decoded entries.
+# Assert that the transaction was accepted here. The returned entries are
+# asserted below through registry_browser and the HTTP API, both reading the
+# same wallet and sequencer state.
+grep -q 'Transaction confirmed' e2e-artifacts/spel-search.txt
 
 PDA_ENTRY=$(lgs spel -- pda entry --key "$PID" | tr -d '\r' | tail -n 1)
 PDA_INDEX=$(lgs spel -- pda index | tr -d '\r' | tail -n 1)
