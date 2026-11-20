@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-License-Identifier: MIT AND Apache-2.0
 # Start an isolated Logos Storage module host with a caller-controlled token.
 # Useful when the Basecamp-managed storage instance's capability token is not
 # available to a headless client.

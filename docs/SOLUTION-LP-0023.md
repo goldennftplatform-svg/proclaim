@@ -27,7 +27,7 @@ The full lifecycle has been executed end-to-end against a local standalone seque
 
 - **Repo:** <https://github.com/goldennftplatform-svg/proclaim>
 - **Commit referenced by this submission:** latest `master` HEAD (this early draft is updated as work lands; the exact commit will be pinned when the PR is finalized).
-- **License:** dual licensed under the MIT License and Apache License 2.0 (`LICENSE-MIT`, `LICENSE-APACHE`; crates and new source files declare `MIT OR Apache-2.0`).
+- **License:** dual licensed under the MIT License and Apache License 2.0 (`LICENSE-MIT`, `LICENSE-APACHE`; crates and new source files declare `MIT AND Apache-2.0`).
 - **IDL:** [`registry-idl.json`](https://github.com/goldennftplatform-svg/proclaim/blob/master/registry-idl.json), generated from the SPEL annotations via `make idl`. The frozen upload copy has SHA-256 `ef4fddc41d098d8360f4685df15f0e7dee33a0ff8dbce65041603dfac8cc4ee1` and matches the checked-in IDL byte-for-byte.
 - **Status / evidence log:** [`LP0023.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/LP0023.md) records program IDs, PDAs, transaction hashes and CIDs.
 - **CI:** [`.github/workflows/ci.yml`](https://github.com/goldennftplatform-svg/proclaim/blob/master/.github/workflows/ci.yml) — fmt, clippy, Rust unit tests, JS tests and a full real-sequencer lifecycle E2E job on every push/PR (green-run link is recorded under the E2E criterion once available).

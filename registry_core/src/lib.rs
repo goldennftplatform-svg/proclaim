@@ -1,6 +1,6 @@
 //! Shared, host-side types for the LP-0023 LEZ Program Registry.
 //! Layout must stay byte-identical to the guest `RegistryEntry` (Borsh).
-//! Dual-licensed: MIT OR Apache-2.0.
+//! Dual-licensed: MIT AND Apache-2.0.
 
 use serde::{Deserialize, Serialize};
 

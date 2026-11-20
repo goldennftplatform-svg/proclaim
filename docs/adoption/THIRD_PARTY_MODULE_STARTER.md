@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-License-Identifier: MIT AND Apache-2.0 -->
 
 # Third-party Logos UI module starter (LP-0023 registry)
 
@@ -10,7 +10,7 @@ work on localnet, **testnet 0.4 is pending**, and the Qt/QML module in
 **pending**. There is no adoption to assume here; you would be an independent
 integrator.
 
-Repo: <https://github.com/goldennftplatform-svg/proclaim> (MIT OR Apache-2.0)
+Repo: <https://github.com/goldennftplatform-svg/proclaim> (MIT AND Apache-2.0)
 
 ## 0. Where to get the API and SDKs
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-License-Identifier: MIT AND Apache-2.0
 #
 # Clean-environment demo for the LP-0023 LEZ Program Registry (proclaim).
 #

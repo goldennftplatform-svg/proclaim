@@ -5,7 +5,7 @@
 //! Reads the sequencer connection from `LEE_WALLET_HOME_DIR`
 //! (wallet_config.json + storage.json).
 //!
-//! Dual-licensed: MIT OR Apache-2.0.
+//! Dual-licensed: MIT AND Apache-2.0.
 
 use std::env;
 use std::process;

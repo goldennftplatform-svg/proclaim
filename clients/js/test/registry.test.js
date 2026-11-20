@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: MIT AND Apache-2.0
 
 import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';

@@ -2,7 +2,7 @@
 
 //! LP-0023 — LEZ Program Registry.
 //! One PDA per program ID. Metadata + Logos Storage pointers live on-chain.
-//! Dual-licensed: MIT OR Apache-2.0.
+//! Dual-licensed: MIT AND Apache-2.0.
 
 use spel_framework::prelude::*;
 use nssa_core::account::Data;

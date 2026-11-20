@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: MIT AND Apache-2.0
 // Generated from src/index.ts (kept in sync by hand; see README.md).
 
 /** A registry entry as returned by this client (keys are base58 strings). */

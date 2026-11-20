@@ -2,7 +2,7 @@
 //!
 //! Keeps chain access, PDA derivation, decoding and filtering in one place so
 //! `registry-api` and `registry_browser` cannot drift apart.
-//! Dual-licensed: MIT OR Apache-2.0.
+//! Dual-licensed: MIT AND Apache-2.0.
 
 use std::fmt;
 

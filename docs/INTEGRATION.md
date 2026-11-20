@@ -1,11 +1,11 @@
-<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-License-Identifier: MIT AND Apache-2.0 -->
 
 # Integrate your LEZ program with the registry in 15 minutes
 
 This tutorial takes a deployed LEZ program from "I have a binary" to "anyone can
 find it, inspect its IDL/source, and check an independent rebuild attestation".
 Everything below is read-only except the two transactions in steps 3 and 5.
-The registry is dual-licensed under MIT OR Apache-2.0.
+The registry is dual-licensed under MIT AND Apache-2.0.
 
 ## Constants you will need
 

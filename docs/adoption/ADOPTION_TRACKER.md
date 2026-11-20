@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-License-Identifier: MIT AND Apache-2.0 -->
 
 # LP-0023 adoption tracker
 
@@ -6,7 +6,7 @@
 deployment is pending, and no adoption criterion is met. Values below are the
 current honest counts — nothing here is projected or inflated.
 
-Repo: <https://github.com/goldennftplatform-svg/proclaim> (MIT OR Apache-2.0)
+Repo: <https://github.com/goldennftplatform-svg/proclaim> (MIT AND Apache-2.0)
 
 ## Criteria and current values
 

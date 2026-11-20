@@ -3,7 +3,7 @@
 A SPEL program built with [spel-framework](https://github.com/logos-co/spel).
 
 **This project implements [LP-0023 — LEZ Program Registry](LP0023.md).**
-Dual-licensed under MIT OR Apache-2.0. The full lifecycle (deploy, register,
+Dual-licensed under MIT AND Apache-2.0. The full lifecycle (deploy, register,
 search, attributed independent verification, authorization checks) is working
 on localnet; see `LP0023.md` for program IDs, PDAs, and tested commands.
 

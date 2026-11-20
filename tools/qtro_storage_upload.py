@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-License-Identifier: MIT AND Apache-2.0
 """Upload files to a Logos Storage module over Qt Remote Objects (QtRO 2.0).
 
 The storage module is not an HTTP service: it publishes a QtRO source on a Unix

@@ -67,6 +67,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
+      # rzup queries the GitHub API for toolchain releases; without a token it
+      # uses the 60/hr unauthenticated limit and flakes (observed run #4:
+      # 403 API rate limit exceeded at https://api.github.com/repos/risc0/rust).
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       LEE_WALLET_HOME_DIR: ${{ github.workspace }}/.scaffold/wallet
       NSSA_WALLET_HOME_DIR: ${{ github.workspace }}/.scaffold/wallet
       LOGOS_SCAFFOLD_CACHE_ROOT: ${{ github.workspace }}/.cache/logos-scaffold

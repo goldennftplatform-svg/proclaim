@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-License-Identifier: MIT AND Apache-2.0 -->
 
 # @lp0023/registry-client
 
@@ -91,4 +91,4 @@ npm run build            # tsc -p tsconfig.json (needs TypeScript installed)
 its tests run without installing TypeScript. If `tsc` is available, `npm run
 build` regenerates them from `src/index.ts`; keep them in sync with the source.
 
-Dual-licensed under MIT OR Apache-2.0.
+Dual-licensed under MIT AND Apache-2.0.

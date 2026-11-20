@@ -1,7 +1,7 @@
 # LP-0023 — Roadmap beyond localnet
 
 Status snapshot: 2026-11-19. Registry published at
-https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
+https://github.com/goldennftplatform-svg/proclaim (MIT AND Apache-2.0).
 
 ## Phase A — Close the local deliverable (complete)
 - [x] On-chain registry: 6 instructions, IDL, FFI, generated UI scaffold.
@@ -37,9 +37,12 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
       local `lgx` CLI (no Nix/Docker); fixes included the C++ `register`
       keyword and preserving generated manifest hashes. Full record:
       `docs/LGX-BUILD.md`.
-- [ ] Publish the `.lgx` as a GitHub Release asset + `logos-modules-release-base`
-      catalog (`logos-repo.json`), then install-test in Basecamp. Decide whether
-      to rebuild via `logos-module-builder` (`mkLogosModule`/`mkLogosQmlModule`).
+- [x] Publish the `.lgx` as a [GitHub Release asset](https://github.com/goldennftplatform-svg/proclaim/releases/tag/registry-v0.1.0)
+      and in the [proclaim-modules catalog](https://github.com/goldennftplatform-svg/proclaim-modules)
+      (`logos-repo.json` + generated `index.json`; official `index.py validate-repo`
+      and `validate --full` pass). Still pending: Basecamp install-test and the
+      decision whether to rebuild via `logos-module-builder`
+      (`mkLogosModule`/`mkLogosQmlModule`).
 - [ ] Recruit 5 independent UI/module authors to consume the registry client
       (FFI header + `registry_core` SDK are the integration surface).
 - [ ] Track each module's repo + the registry entries it registers.
@@ -55,13 +58,13 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
 - [x] Draft the solution PR body (`docs/SOLUTION-LP-0023.md`) and submission
       steps (`docs/SUBMIT-LP-0023.md`), modelled on solution PR #187's
       early-draft pattern. Not yet opened in `logos-co/lambda-prize`.
-- [x] CI workflow with fmt/clippy/unit tests on push/PR (`.github/workflows/ci.yml`);
-      manual real-sequencer E2E job documented in `docs/CI.md`.
-- [ ] Automatic real-sequencer E2E on every push: implementation files are
-      staged and locally ground-checked (`staged/e2e-ci/`, plan in
-      `docs/E2E-CI-PLAN.md`), but NOT yet applied to the repo and NOT yet proven
-      by a green default-branch GHA run. Do not mark this complete until a
-      successful run is linked.
+- [x] CI workflow with fmt/clippy/unit tests and an automatic real-sequencer
+      lifecycle E2E job on every push/PR (`.github/workflows/ci.yml`,
+      `scripts/e2e-real-sequencer.sh`); plan in `docs/E2E-CI-PLAN.md`.
+- [ ] Automatic real-sequencer E2E: implementation is applied and pushed
+      (default-branch run `https://github.com/goldennftplatform-svg/proclaim/actions/runs/44666188261`);
+      keep this unchecked until the whole run is green, then replace this note
+      with the final green run link.
 - [x] Clean-environment demo script (`scripts/demo-clean.sh`) with offline and
       read-only online modes.
 - [x] Adoption outreach kit in `docs/adoption/` (builder-hub post, third-party

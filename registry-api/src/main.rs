@@ -2,7 +2,7 @@
 //!
 //! Serves the on-chain global index and decoded entries over GET endpoints.
 //! Configuration is entirely via environment variables (see README.md).
-//! Dual-licensed: MIT OR Apache-2.0.
+//! Dual-licensed: MIT AND Apache-2.0.
 
 use std::env;
 use std::path::PathBuf;

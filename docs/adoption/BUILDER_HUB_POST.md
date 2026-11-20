@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-License-Identifier: MIT AND Apache-2.0 -->
 
 # Draft post for Logos Discord — #builder-hub
 
@@ -13,7 +13,7 @@
 Hey #builder-hub 👋
 
 I've published an **early draft** of `proclaim`, a LEZ Program Registry built
-with SPEL, for Logos λPrize LP-0023. Repo (MIT OR Apache-2.0):
+with SPEL, for Logos λPrize LP-0023. Repo (MIT AND Apache-2.0):
 https://github.com/goldennftplatform-svg/proclaim
 
 **Where it stands, honestly:**

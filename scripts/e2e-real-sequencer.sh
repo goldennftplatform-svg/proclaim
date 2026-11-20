@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-License-Identifier: MIT AND Apache-2.0
 # Automatic LP-0023 lifecycle against a fresh LEZ standalone sequencer.
 set -euo pipefail
 
