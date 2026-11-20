@@ -8,17 +8,14 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
 - [x] `registry_browser` read-only enumerator (tag/author/verified filters).
 - [x] Clean-room `verify-source.sh` reproduces the v5 program ID.
 - [x] Repo published with dual licenses, no secrets, reproducible-build docs.
-- [ ] **QtRO storage client** → upload IDL + source, obtain real CIDs.
-      - Toolchain: PySide6 `QtRemoteObjects` (installing), or a small C++ client
-        linked against the AppImage's `libQt6RemoteObjects.so.6`.
-      - Socket: `/tmp/logos_storage_module_<hash>` (QtRO 2.0 / QDataStream).
-      - Methods: `uploadUrl(path, chunkSize, advertise)`, then read the CID from
-        the `storageUploadDone` event; confirm with `exists(cid)` / `manifests()`.
-- [ ] Update on-chain entry with real `idl_cid` / `code_cid` / evidence CID
+- [x] **QtRO storage client** → uploaded IDL + source, obtained real CIDs
+      (`zDv*8iXZ6U`, `zDv*yXuozL`) with `tools/qtro_storage_upload.py`.
+- [x] Update on-chain entry with real `idl_cid` / `code_cid` / evidence CID
       (`update` is author-only; a source-field change clears any prior attestation).
-- [ ] Re-run `verify-source.sh`, then submit independent `mark-verified` from the
-      verifier account. Confirm `registry_browser --verified` shows the entry.
-- [ ] Commit the reusable QtRO upload helper into the repo under `scripts/`.
+- [x] Re-ran `verify-source.sh` (byte-for-byte match), submitted independent
+      `mark-verified` from the verifier account. `registry_browser --verified`
+      shows the entry.
+- [x] Commit the reusable QtRO upload helper under `tools/` (+ host launcher).
 
 ## Phase B — Testnet 0.4 deployment
 - [ ] Obtain testnet sequencer endpoint + funded deployer wallet.
@@ -42,6 +39,9 @@ https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
 - [ ] macOS coverage: verify `verify-source.sh` and the FFI build on macOS.
 
 ## Phase E — Submission readiness
+- [x] Draft the solution PR body (`docs/SOLUTION-LP-0023.md`) and submission
+      steps (`docs/SUBMIT-LP-0023.md`), modelled on solution PR #187's
+      early-draft pattern. Not yet opened in `logos-co/lambda-prize`.
 - [ ] Ensure every criterion in the LP-0023 spec maps to a linked artifact.
 - [ ] Public posting history / account history checks: keep all work in the
       published repo and public testnet, no manufactured volume.
