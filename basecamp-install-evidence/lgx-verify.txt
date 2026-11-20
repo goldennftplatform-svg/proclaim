@@ -1,0 +1,6 @@
+Package structure is valid: /home/xps/logos-work/registry/ui/registry/registry.lgx
+Signature is valid
+Signer DID: did:jwk:eyJjcnYiOiJFZDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6ImpiZDM1NHFnMkhHSkg4NVpHcVFJNmFjckNfQWs0SXE0ZnRyakFxUEo3UzAifQ
+Signer name (self-asserted): proclaim LP-0023
+Signer URL (self-asserted): https://github.com/goldennftplatform-svg/proclaim
+Signer DID is NOT in trusted keyring
