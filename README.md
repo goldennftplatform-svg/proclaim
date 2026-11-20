@@ -162,6 +162,34 @@ curl -s http://127.0.0.1:3030/search?tag=registry
 curl -s http://127.0.0.1:3030/entry/6FMaVQ6CmbAVNHgwsmmeBe5kiiKkQRFtqu4GUQ2vAf2T
 ```
 
+## Logos Storage upload client (QtRO)
+
+The storage module is a Qt Remote Objects source on a Unix socket, not an HTTP
+service. `tools/qtro_storage_upload.py` (PySide6 `QtRemoteObjects`) uploads local
+files and reports the resulting CIDs. `tools/launch_storage_host.sh` starts an
+isolated `logos_host` with a caller-controlled token when the
+Basecamp-managed instance's capability token is unavailable to a headless
+client.
+
+```bash
+# terminal 1: keep this running
+tools/launch_storage_host.sh
+
+# terminal 2
+python3 tools/qtro_storage_upload.py \
+  --token-file /tmp/proclaim_storage_token \
+  --init-json '{"data-dir":"/home/xps/proclaim-storage-data","network":"logos.test"}' \
+  --host-log <host-stderr-log> \
+  --out /tmp/cids.json \
+  artifacts/registry-idl.json artifacts/proclaim-source-v5.tar.gz
+```
+
+The bridge signature is `callRemoteMethod(authToken, methodName, args)`; only
+`getPluginMethods`/`getPluginEvents`/`getPluginInterface` are ungated. PySide6
+6.12 does not expose dynamic-replica return values, so `--host-log` is used to
+recover CIDs when the `storageUploadDone` event is dropped. See `LP0023.md` for
+the CIDs currently recorded on chain.
+
 ## How It Works
 
 The `#[lez_program]` macro in your guest binary defines your on-chain program.
