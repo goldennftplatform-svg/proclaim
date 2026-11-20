@@ -86,7 +86,9 @@ jobs:
       REGISTRY_API_ADDR: 127.0.0.1:3030
       REGISTRY_PROGRAM_ID: 4df7d5396b68a16aae6d0f768ef447a0055eb43866827154f71139e486265144
       E2E_SEQUENCER_PORT: "3040"
-      E2E_CHANNEL_ID: 0101010101010101010101010101010101010101010101010101010101010101
+      # Quoted: unquoted, the YAML parser coerces this leading-zero digit
+      # string to 1.01010101010101E+62 and the RPC readiness check fails.
+      E2E_CHANNEL_ID: "0101010101010101010101010101010101010101010101010101010101010101"
       # Metadata strings only. Logos Storage CIDs are not fetched by this job.
       E2E_IDL_CID: ${{ vars.E2E_IDL_CID || 'zDv*8iXZ6U' }}
       E2E_CODE_CID: ${{ vars.E2E_CODE_CID || 'zDv*yXuozL' }}

@@ -25,6 +25,10 @@ print('1' * zeros + out)
 PY
 )"
 CHANNEL_ID="${E2E_CHANNEL_ID:-0101010101010101010101010101010101010101010101010101010101010101}"
+# A YAML-parsed env value can arrive as 1.01010101010101E+62. Reject malformed
+# values here so the failure names the cause instead of printing a bare `false`.
+printf '%s' "$CHANNEL_ID" | grep -Eq '^[0-9a-f]{64}$' \
+  || { echo "ERROR: E2E_CHANNEL_ID must be 64 lowercase hex chars (got '$CHANNEL_ID')" >&2; exit 1; }
 PORT="${E2E_SEQUENCER_PORT:-3040}"
 BIN="methods/guest/target/riscv32im-risc0-zkvm-elf/docker/registry.bin"
 
