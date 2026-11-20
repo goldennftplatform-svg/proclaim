@@ -9,7 +9,7 @@ use std::fmt;
 use base58::{FromBase58, ToBase58};
 use nssa::AccountId;
 use nssa_core::program::{PdaSeed, ProgramId};
-use registry_core::{search_entries, RegistryEntry, RegistryIndex};
+use registry_core::{search_entries_with_name, RegistryEntry, RegistryIndex};
 use tokio::sync::{mpsc, oneshot};
 use wallet::WalletCore;
 
@@ -169,15 +169,17 @@ pub async fn fetch_entries(
     Ok(entries)
 }
 
-/// Filter entries by tag (OR semantics), author and independent verification.
+/// Filter entries by name (case-insensitive substring), tag (OR semantics),
+/// author and independent verification.
 pub fn filter_entries<'a>(
     entries: &'a [RegistryEntry],
     tags: &[String],
     author: Option<&[u8; 32]>,
     verified_only: bool,
+    name: Option<&str>,
 ) -> Vec<&'a RegistryEntry> {
     let tag_refs: Vec<&str> = tags.iter().map(String::as_str).collect();
-    search_entries(entries, &tag_refs, author, verified_only)
+    search_entries_with_name(entries, &tag_refs, author, verified_only, name)
 }
 
 /// A request to the wallet-owning worker thread.

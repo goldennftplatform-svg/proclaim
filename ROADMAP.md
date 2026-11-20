@@ -3,9 +3,14 @@
 Status snapshot: 2026-11-19. Registry published at
 https://github.com/goldennftplatform-svg/proclaim (MIT OR Apache-2.0).
 
-## Phase A — Close the local deliverable (in progress)
+## Phase A — Close the local deliverable (complete)
 - [x] On-chain registry: 6 instructions, IDL, FFI, generated UI scaffold.
-- [x] `registry_browser` read-only enumerator (tag/author/verified filters).
+- [x] `registry_browser` read-only enumerator (name/tag/author/verified filters).
+- [x] Name search end-to-end: `registry_core::search_entries_with_name`,
+      `registry_browser --name`, `/search?name=…`, `client.search({ name })`.
+- [x] Graceful IDL degradation: `idl_availability()` / `idlAvailability()` with
+      unit tests (7 Rust + 8 JS passing).
+- [x] `docs/PERFORMANCE.md` cost model and `cycle_bench` procedure (numbers TBD).
 - [x] Clean-room `verify-source.sh` reproduces the v5 program ID.
 - [x] Repo published with dual licenses, no secrets, reproducible-build docs.
 - [x] **QtRO storage client** → uploaded IDL + source, obtained real CIDs

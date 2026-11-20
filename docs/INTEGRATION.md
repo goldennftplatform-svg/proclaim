@@ -135,14 +135,17 @@ Quote CIDs (`'zDv*8iXZ6U'`) so the shell does not glob them. Only the original
 
 ## 4. Search with the HTTP API or the JS client (2 min)
 
-All endpoints are `GET`; errors are JSON `{"error":"..."}`. Tags repeat and are
-OR-matched; `author`, `verified` and `limit` are optional.
+All endpoints are `GET`; errors are JSON `{"error":"..."}`. `name` is a
+case-insensitive substring match; tags repeat and are OR-matched (also
+case-insensitive); `author`, `verified` and `limit` are optional. Filter kinds
+compose with AND, tags with each other with OR.
 
 ```bash
 curl -s http://127.0.0.1:3030/health
 curl -s http://127.0.0.1:3030/index
 curl -s http://127.0.0.1:3030/entries
 curl -sG http://127.0.0.1:3030/search \
+  --data-urlencode 'name=LP-0023' \
   --data-urlencode 'tag=registry' \
   --data-urlencode 'tag=spel' \
   --data-urlencode 'verified=true' \
@@ -159,14 +162,18 @@ Copy-paste JS example:
 ```bash
 npm install ./clients/js
 cat > search.mjs <<'EOF'
-import { RegistryClient, RegistryApiError } from '@lp0023/registry-client';
+import { RegistryClient, RegistryApiError, idlAvailability } from '@lp0023/registry-client';
 
 const client = new RegistryClient('http://127.0.0.1:3030');
 
 try {
-  const entries = await client.search({ tags: ['registry', 'spel'], limit: 10 });
+  const entries = await client.search({
+    name: 'registry', tags: ['registry', 'spel'], limit: 10,
+  });
   for (const e of entries) {
-    console.log(e.program_id, e.name, e.version, e.idl_cid,
+    // Metadata renders even when the IDL CID is missing or unresolvable.
+    const idl = idlAvailability(e) === 'available' ? e.idl_cid : '(no IDL)';
+    console.log(e.program_id, e.name, e.version, idl,
                 e.source_verified ? 'verified' : 'unverified');
   }
 
@@ -228,6 +235,6 @@ updates keep the attestation.
 - [ ] Entry PDA derived with `--key <program-id>`; index PDA is `registry_index`.
 - [ ] IDL + source uploaded via `tools/qtro_storage_upload.py`; CIDs in hand.
 - [ ] `register` includes commit and a reproducible `build_config`; tags set.
-- [ ] `/entry/<base58>` and `/search?tag=...` return the expected record.
+- [ ] `/entry/<base58>`, `/search?tag=...` and `/search?name=...` return the expected record.
 - [ ] A different account rebuilt from source and called `mark-verified`.
 - [ ] Any source-changing update was followed by a fresh attestation.

@@ -41,6 +41,8 @@ export interface RegistryEntry {
 
 /** Filters accepted by `RegistryClient.search`. */
 export interface RegistrySearchOptions {
+  /** Case-insensitive substring match against the entry name. */
+  name?: string;
   /** Repeatable tags; OR-matched, case-insensitive substring match. */
   tags?: string[];
   /** Author account as base58, hex, or 32 bytes. */
@@ -129,6 +131,20 @@ function normalizeEntry(raw: WireRegistryEntry): RegistryEntry {
   };
 }
 
+/**
+ * Resolution state of an entry's IDL pointer. Rendering entry metadata never
+ * depends on the IDL being fetchable: a missing or placeholder CID is reported
+ * as `'unavailable'` while the on-chain record stays fully usable.
+ */
+export type IdlAvailability = 'available' | 'unavailable';
+
+export function idlAvailability(entry: RegistryEntry): IdlAvailability {
+  const cid = (entry.idl_cid ?? '').trim().toLowerCase();
+  return cid === '' || cid === 'none' || cid === 'null' || cid === 'placeholder'
+    ? 'unavailable'
+    : 'available';
+}
+
 /** Error thrown for any non-2xx response (or a failed fetch). */
 export class RegistryApiError extends Error {
   readonly status: number;
@@ -206,6 +222,7 @@ export class RegistryClient {
   /** GET /search — repeat `tag` for OR filtering; URLSearchParams does the escaping. */
   async search(options: RegistrySearchOptions = {}): Promise<RegistryEntry[]> {
     const params = new URLSearchParams();
+    if (options.name !== undefined) params.set('name', options.name);
     for (const tag of options.tags ?? []) params.append('tag', tag);
     if (options.author !== undefined) params.set('author', normalizeKey(options.author));
     if (options.verified !== undefined) params.set('verified', String(options.verified));

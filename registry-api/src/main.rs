@@ -73,6 +73,7 @@ struct HealthResponse {
 }
 
 struct SearchParams {
+    name: Option<String>,
     tags: Vec<String>,
     author: Option<[u8; 32]>,
     verified_only: bool,
@@ -82,6 +83,7 @@ struct SearchParams {
 /// Parse the query string manually so repeated `tag` keys work and every bad
 /// parameter produces a JSON 400 (instead of axum's plain-text rejection).
 fn parse_search_params(raw: Option<String>) -> ApiResult<SearchParams> {
+    let mut name = None;
     let mut tags = Vec::new();
     let mut author = None;
     let mut verified = None;
@@ -89,6 +91,15 @@ fn parse_search_params(raw: Option<String>) -> ApiResult<SearchParams> {
 
     for (key, value) in form_urlencoded::parse(raw.as_deref().unwrap_or("").as_bytes()) {
         match key.as_ref() {
+            "name" => {
+                if name.is_some() {
+                    return Err(ApiError::bad_request("name may be specified only once"));
+                }
+                if value.is_empty() {
+                    return Err(ApiError::bad_request("name must not be empty"));
+                }
+                name = Some(value.into_owned());
+            }
             "tag" => {
                 if value.is_empty() {
                     return Err(ApiError::bad_request("tag must not be empty"));
@@ -123,6 +134,7 @@ fn parse_search_params(raw: Option<String>) -> ApiResult<SearchParams> {
     }
 
     Ok(SearchParams {
+        name,
         tags,
         author,
         verified_only: verified.unwrap_or(false),
@@ -171,7 +183,13 @@ async fn search(
         .await
         .map_err(|e| ApiError::internal(e.to_string()))?;
 
-    let matched = filter_entries(&entries, &params.tags, params.author.as_ref(), params.verified_only);
+    let matched = filter_entries(
+        &entries,
+        &params.tags,
+        params.author.as_ref(),
+        params.verified_only,
+        params.name.as_deref(),
+    );
     let matched: Vec<RegistryEntry> = matched
         .into_iter()
         .take(params.limit.unwrap_or(usize::MAX))

@@ -1,7 +1,7 @@
 //! Host-side browser for the LP-0023 LEZ Program Registry.
 //!
 //! Enumerates the on-chain global index, derives each entry PDA, fetches and
-//! Borsh-decodes the entries, then filters by tag / author / verification.
+//! Borsh-decodes the entries, then filters by name / tag / author / verification.
 //! Reads the sequencer connection from `LEE_WALLET_HOME_DIR`
 //! (wallet_config.json + storage.json).
 //!
@@ -18,6 +18,7 @@ use wallet::WalletCore;
 #[derive(Default, Debug)]
 struct Args {
     program_id_hex: String,
+    name: Option<String>,
     tags: Vec<String>,
     authors: Vec<[u8; 32]>,
     verified_only: bool,
@@ -35,6 +36,7 @@ fn usage() -> ! {
          \n\
          OPTIONS:\n\
          \x20 --program-id <hex>   registry program id (default: v5 deployed id)\n\
+         \x20 --name <substring>  filter by name (case-insensitive substring)\n\
          \x20 --tag <tag>          filter by tag (repeatable, OR semantics)\n\
          \x20 --author <key>       filter by author account (base58 or 64-hex, repeatable)\n\
          \x20 --verified           only independently verified entries\n\
@@ -62,6 +64,10 @@ fn parse_args() -> Args {
             "--program-id" => {
                 i += 1;
                 a.program_id_hex = argv.get(i).cloned().unwrap_or_else(|| die("--program-id needs a value"));
+            }
+            "--name" => {
+                i += 1;
+                a.name = Some(argv.get(i).cloned().unwrap_or_else(|| die("--name needs a value")));
             }
             "--tag" => {
                 i += 1;
@@ -198,7 +204,13 @@ async fn main() {
     }
 
     let author_refs: Vec<&[u8; 32]> = args.authors.iter().collect();
-    let matched = registry_api::filter_entries(&entries, &args.tags, None, args.verified_only);
+    let matched = registry_api::filter_entries(
+        &entries,
+        &args.tags,
+        None,
+        args.verified_only,
+        args.name.as_deref(),
+    );
     let matched: Vec<&RegistryEntry> = if author_refs.is_empty() {
         matched
     } else {

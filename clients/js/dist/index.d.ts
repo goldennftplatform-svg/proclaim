@@ -23,6 +23,7 @@ export interface RegistryEntry {
 
 /** Filters accepted by `RegistryClient.search`. */
 export interface RegistrySearchOptions {
+  name?: string;
   tags?: string[];
   author?: string | number[];
   verified?: boolean;
@@ -34,6 +35,9 @@ export type SearchOptions = RegistrySearchOptions;
 export interface HealthResponse {
   status: string;
 }
+
+export type IdlAvailability = 'available' | 'unavailable';
+export declare function idlAvailability(entry: RegistryEntry): IdlAvailability;
 
 /** Error thrown for any non-2xx response (or a failed fetch). */
 export declare class RegistryApiError extends Error {

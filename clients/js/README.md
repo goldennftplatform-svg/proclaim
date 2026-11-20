@@ -33,8 +33,9 @@ const health = await client.health();            // { status: 'ok' }
 const ids = await client.index();                // base58 program IDs
 const all = await client.entries();              // RegistryEntry[]
 
-// Repeatable tags are OR-matched (case-insensitive substring).
+// `name` is a case-insensitive substring; repeatable tags are OR-matched.
 const entries = await client.search({
+  name: 'registry',
   tags: ['registry', 'spel'],
   verified: true,
   limit: 10,
@@ -64,8 +65,10 @@ arrays from the API and normalises them. Query strings are built with
 other values containing `*` or other reserved characters are handled safely.
 
 TypeScript users get `RegistryEntry`, `RegistrySearchOptions` (alias
-`SearchOptions`), `HealthResponse`, `RegistryClient`, and `RegistryApiError`
-from the package root.
+`SearchOptions`), `IdlAvailability`, `idlAvailability()`, `HealthResponse`,
+`RegistryClient`, and `RegistryApiError` from the package root. Calling
+`idlAvailability(entry)` returns `'unavailable'` for empty or placeholder CIDs
+so UIs can render metadata without trying to fetch an IDL that isn't there.
 
 ## API surface
 
@@ -74,7 +77,7 @@ from the package root.
 | `health()` | `GET /health` |
 | `index()` | `GET /index` |
 | `entries()` | `GET /entries` |
-| `search({ tags?, author?, verified?, limit? })` | `GET /search` |
+| `search({ name?, tags?, author?, verified?, limit? })` | `GET /search` |
 | `entry(programId)` | `GET /entry/:program_id` |
 
 ## Development

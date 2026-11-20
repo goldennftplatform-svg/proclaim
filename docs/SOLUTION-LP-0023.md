@@ -57,24 +57,24 @@ Legend: `[x]` = met with evidence in the repo / on chain; `[ ]` = not yet met (p
 - [ ] **Deployer vs third-party entries.** The entry carries an on-chain `deployer_claimed` flag and any account may register; unauthorized **update** and self-**verification** attempts are rejected and demonstrated (`LP0023.md`). However, the deployer claim is currently self-asserted by the signer rather than cryptographically bound to the deployment, and there is no demo of an unauthorized deployer entry being rejected. Pending.
 - [x] **Update.** Only the original registering author may update version, IDL pointer and description; an unauthorized update was rejected on-chain. Authorship transfer (optional) is not implemented.
 - [x] **IDL publishing to Logos Storage.** Real CID `zDv*8iXZ6U` recorded on-chain (`update` tx `90e972de2f2b3dede86f52eead470d5fbe070078f90b0508ae33fe4a35896fbe`). Network retrieval is tracked separately below.
-- [ ] **Discovery: lookup / enumerate / search by name and author.** `lookup` derives the entry PDA; `search` reads the global index; `registry_browser`, the HTTP API and the JS client enumerate and filter by tag, author and verification status. **Search by name** is not yet implemented (filters currently cover tags, author and verified only). Pending.
+- [x] **Discovery: lookup / enumerate / search by name and author.** `lookup` derives the entry PDA; `search` reads the global index; `registry_browser` (`--name`), the HTTP API (`/search?name=…`) and the JS client (`search({ name })`) all support case-insensitive substring search by name, plus tag (OR), author and verification filters. Filter kinds compose with AND. Covered by SDK and JS unit tests.
 - [x] **Source verification.** The on-chain entry records a source CID, commit and build configuration; `scripts/verify-source.sh` reproduces the program ID byte-for-byte from a clean build; an independent `mark_verified` from a different account recorded method `reproducible-rebuild:program-id` and evidence CID `zDv*yXuozL` (tx `4d31a6cf…`). A source-changing update clears the attestation (tested).
 - [ ] **Testnet 0.4.** Everything above was executed against a local standalone sequencer (`127.0.0.1:3040`). No testnet 0.4 deployment exists yet. Pending.
 
 ### Usability
 
 - [x] **Module / SDK for other modules and third-party apps.** `registry_core` (Rust SDK with types, PDA helpers and search filters), generated C FFI (`registry_ffi/generated/registry.h`, `registry_client.rs`), read-only HTTP API (`registry-api`) and a dependency-free JS/TS client (`clients/js`), with a worked example in [`docs/INTEGRATION.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/INTEGRATION.md).
-- [x] **CLI covering register, update, lookup, search and source verification.** The IDL-driven `lgs spel` / `make cli` interface exposes all six instructions; `make browser` provides a read-only enumerator with tag/author/verified filters.
+- [x] **CLI covering register, update, lookup, search and source verification.** The IDL-driven `lgs spel` / `make cli` interface exposes all six instructions; `make browser` provides a read-only enumerator with name/tag/author/verified filters.
 - [ ] **Logos Core Module published to a catalog.** A Qt/QML Basecamp module scaffold exists at `ui/registry/` (generated via `make ui-gen`), and `make lgx` / `make lgx-sign` targets are present, but the module has not yet been built with `logos-module-builder` (`mkLogosModule`) or published to a `logos-modules-release-base` catalog. Pending.
 
 ### Reliability
 
-- [ ] **Graceful degradation for unresolvable / unparseable IDLs.** Entries render from on-chain metadata independently of CID resolution, but there is no automated test covering an unresolvable or malformed IDL. Pending.
+- [x] **Graceful degradation for unresolvable / unparseable IDLs.** Registry metadata lives on-chain and is rendered without fetching the IDL at all, so a missing or malformed IDL body cannot break entry display. Both SDKs make this explicit: `registry_core::RegistryEntry::idl_availability()` and the JS `idlAvailability()` report empty/placeholder CIDs as `Unavailable`/`'unavailable'`, with unit tests in `registry_core` (7 passing) and `clients/js` (8 passing).
 - [x] **No mandatory centralized external services.** Beyond the configured sequencer and Logos Storage, no third-party web service is required; the repository contains no analytics or telemetry.
 
 ### Performance
 
-- [ ] **Cycle counts for register and update.** Not yet measured; the plan is to use the LEZ `cycle_bench` tool and document per-instruction counts. Pending.
+- [ ] **Cycle counts for register and update.** Not yet measured. The cost model, per-instruction account accesses and the exact `cycle_bench` procedure are documented in [`docs/PERFORMANCE.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/PERFORMANCE.md); the results table is left as `TBD` rather than estimated. `cycle_bench` was not available in the build environment. Pending.
 
 ### Supportability
 
@@ -100,7 +100,7 @@ Legend: `[x]` = met with evidence in the repo / on chain; `[ ]` = not yet met (p
 
 ### Functionality
 
-Six on-chain instructions cover the registry lifecycle: initialize the global index, register an entry, author-only update, independent verification, and two read paths. Clients derive an entry PDA from a program ID and enumerate the global index for search. SDK, CLI, HTTP API, JS client, FFI header and a reproducible-build verifier are provided. Limitations: no authorship transfer, no name search yet, no cryptographic deployer-claim binding yet, and no CI/testnet-0.4 deployment yet.
+Six on-chain instructions cover the registry lifecycle: initialize the global index, register an entry, author-only update, independent verification, and two read paths. Clients derive an entry PDA from a program ID and enumerate the global index for search. SDK, CLI, HTTP API, JS client, FFI header and a reproducible-build verifier are provided. Name and author search, and graceful handling of unusable IDL pointers, are covered by unit tests. Limitations: no authorship transfer, no cryptographic deployer-claim binding yet, no measured cycle counts, and no CI/testnet-0.4 deployment yet.
 
 ### Usability
 
@@ -112,7 +112,7 @@ Authorization is enforced on-chain: only the original author can update; verific
 
 ### Performance
 
-On-chain writes are bounded to metadata and pointers. Cycle counts are not yet documented. Off-chain search reads a single index account and derives/fetches entry accounts, so query cost scales linearly with the number of entries and requires no indexer service.
+On-chain writes are bounded to metadata and pointers. The account-access model is documented in [`docs/PERFORMANCE.md`](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/PERFORMANCE.md); measured cycle counts are still pending because `cycle_bench` was unavailable. Off-chain search reads a single index account and derives/fetches entry accounts, so query cost scales linearly with the number of entries and requires no indexer service.
 
 ### Supportability
 
@@ -125,6 +125,7 @@ The workspace is split into shared types, guest, SDK, FFI, examples, HTTP API, J
 - [IDL](https://github.com/goldennftplatform-svg/proclaim/blob/master/registry-idl.json)
 - [Integration tutorial](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/INTEGRATION.md)
 - [Roadmap — Phase A–E](https://github.com/goldennftplatform-svg/proclaim/blob/master/ROADMAP.md)
+- [Performance and cost notes](https://github.com/goldennftplatform-svg/proclaim/blob/master/docs/PERFORMANCE.md)
 - [Clean-room source verifier](https://github.com/goldennftplatform-svg/proclaim/blob/master/scripts/verify-source.sh)
 - [QtRO storage upload client](https://github.com/goldennftplatform-svg/proclaim/blob/master/tools/qtro_storage_upload.py) and [isolated host launcher](https://github.com/goldennftplatform-svg/proclaim/blob/master/tools/launch_storage_host.sh)
 - [HTTP API](https://github.com/goldennftplatform-svg/proclaim/tree/master/registry-api) and [JS client](https://github.com/goldennftplatform-svg/proclaim/tree/master/clients/js)
@@ -146,14 +147,12 @@ On-chain records (localnet standalone sequencer):
 ## Pending work
 
 1. Bind a deployer claim to the deployment signer and add a demo showing an unauthorized deployer entry being rejected.
-2. Add name search to `search_entries`, `registry_browser`, the HTTP API and the JS client.
-3. Make uploaded CIDs network-retrievable (run a publicly reachable storage node seeded with the IDL and source), then prove retrieval by an independent node.
-4. Measure and document cycle counts for `register` and `update` using LEZ `cycle_bench`.
-5. Add an automated test for unresolvable / malformed IDL handling.
-6. Deploy to Logos testnet 0.4 once available; record the program ID and rerun the lifecycle and verification there.
-7. Package `ui/registry/` with `logos-module-builder`, publish it to a `logos-modules-release-base` catalog, and include the `logos-repo.json` URL.
-8. Add CI with a real-sequencer E2E job, green on the default branch; extend platform coverage.
-9. Adoption: recruit 5 independent third-party UI modules, drive 50 registrations from 20 independent authors over ≥2 months (≥10/month), reach 20 verified source claims, collect 20 Discord and 20 X testimonials, and include macOS users/installs.
+2. Make uploaded CIDs network-retrievable (run a publicly reachable storage node seeded with the IDL and source), then prove retrieval by an independent node.
+3. Measure and document cycle counts for `register` and `update` using LEZ `cycle_bench`, filling in `docs/PERFORMANCE.md`.
+4. Deploy to Logos testnet 0.4 once available; record the program ID and rerun the lifecycle and verification there.
+5. Package `ui/registry/` with `logos-module-builder`, publish it to a `logos-modules-release-base` catalog, and include the `logos-repo.json` URL.
+6. Add CI with a real-sequencer E2E job, green on the default branch; extend platform coverage.
+7. Adoption: recruit 5 independent third-party UI modules, drive 50 registrations from 20 independent authors over ≥2 months (≥10/month), reach 20 verified source claims, collect 20 Discord and 20 X testimonials, and include macOS users/installs.
 
 ## Terms & Conditions
 

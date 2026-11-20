@@ -50,6 +50,13 @@ function normalizeEntry(raw) {
   };
 }
 
+export function idlAvailability(entry) {
+  const cid = (entry.idl_cid ?? '').trim().toLowerCase();
+  return cid === '' || cid === 'none' || cid === 'null' || cid === 'placeholder'
+    ? 'unavailable'
+    : 'available';
+}
+
 export class RegistryApiError extends Error {
   constructor(status, body, message) {
     super(message);
@@ -116,6 +123,7 @@ export class RegistryClient {
 
   async search(options = {}) {
     const params = new URLSearchParams();
+    if (options.name !== undefined) params.set('name', options.name);
     for (const tag of options.tags ?? []) params.append('tag', tag);
     if (options.author !== undefined) params.set('author', normalizeKey(options.author));
     if (options.verified !== undefined) params.set('verified', String(options.verified));

@@ -95,8 +95,8 @@ registry/
 ## Registry Browser (read-only host tool)
 
 `registry_browser` enumerates the on-chain global index, derives each entry PDA,
-fetches and Borsh-decodes the entries, and filters by tag / author / independent
-verification. It reads the sequencer connection from `LEE_WALLET_HOME_DIR`.
+fetches and Borsh-decodes the entries, and filters by name / tag / author /
+independent verification. It reads the sequencer connection from `LEE_WALLET_HOME_DIR`.
 
 ```bash
 source ~/.cargo/env
@@ -106,6 +106,7 @@ cargo build -p registry-examples --bin registry_browser
 
 ./target/debug/registry_browser                    # table of all entries
 ./target/debug/registry_browser --index-only       # just the global index
+./target/debug/registry_browser --name registry    # name substring (case-insensitive)
 ./target/debug/registry_browser --tag registry     # filter by tag (repeatable)
 ./target/debug/registry_browser --verified         # only independently verified
 ./target/debug/registry_browser --author <base58>  # filter by author
@@ -147,7 +148,7 @@ Endpoints (all `GET`, JSON responses; errors are `{"error":"..."}`):
 | `/health` | `{"status":"ok"}` |
 | `/index` | Array of registered program IDs (base58 strings) |
 | `/entries` | Array of full decoded `RegistryEntry` objects |
-| `/search?tag=registry&tag=spel&author=<base58>&verified=true&limit=10` | Filtered entries. Tags are OR-matched (case-insensitive substring, as in `search_entries`); `author`, `verified` and `limit` are optional |
+| `/search?name=registry&tag=spel&author=<base58>&verified=true&limit=10` | Filtered entries. `name` is a case-insensitive substring match; tags are OR-matched (also case-insensitive substring, as in `search_entries`); `author`, `verified` and `limit` are optional |
 | `/entry/<base58>` | Single entry by program ID; `404` when it is not in the index |
 
 `[u8; 32]` fields in `RegistryEntry` (`program_id`, `author`, `verifier`) are
@@ -159,6 +160,7 @@ query parameters return `400`; upstream account/decode failures return `502` or
 curl -s http://127.0.0.1:3030/health
 curl -s http://127.0.0.1:3030/index
 curl -s http://127.0.0.1:3030/search?tag=registry
+curl -s 'http://127.0.0.1:3030/search?name=registry&verified=true'
 curl -s http://127.0.0.1:3030/entry/6FMaVQ6CmbAVNHgwsmmeBe5kiiKkQRFtqu4GUQ2vAf2T
 ```
 

@@ -2,7 +2,7 @@
 
 import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { RegistryApiError, RegistryClient } from '../dist/index.js';
+import { idlAvailability, RegistryApiError, RegistryClient } from '../dist/index.js';
 
 const originalFetch = globalThis.fetch;
 afterEach(() => {
@@ -64,6 +64,7 @@ test('a base URL with a path prefix is preserved', async () => {
 test('search() repeats tag parameters and escapes the rest', async () => {
   const calls = mockJson([]);
   await new RegistryClient().search({
+    name: 'LP-0023 Registry',
     tags: ['registry', 'wallet & defi'],
     author: PROGRAM_ID_BASE58,
     verified: true,
@@ -72,6 +73,7 @@ test('search() repeats tag parameters and escapes the rest', async () => {
 
   const url = calls[0];
   assert.equal(url.pathname, '/search');
+  assert.equal(url.searchParams.get('name'), 'LP-0023 Registry');
   assert.deepEqual(url.searchParams.getAll('tag'), ['registry', 'wallet & defi']);
   assert.equal(url.searchParams.get('author'), PROGRAM_ID_BASE58);
   assert.equal(url.searchParams.get('verified'), 'true');
@@ -113,4 +115,13 @@ test('entry() URL-encodes the path segment', async () => {
   const calls = mockJson(sampleEntry());
   await new RegistryClient().entry('a/b');
   assert.equal(calls[0].pathname, '/entry/a%2Fb');
+});
+
+test('idlAvailability reports unusable IDL pointers without failing', () => {
+  const entry = sampleEntry();
+  assert.equal(idlAvailability(entry), 'available');
+  for (const cid of ['', '   ', 'none', 'NULL', 'Placeholder']) {
+    assert.equal(idlAvailability({ ...entry, idl_cid: cid }), 'unavailable');
+  }
+  assert.equal(idlAvailability({ ...entry, idl_cid: undefined }), 'unavailable');
 });
