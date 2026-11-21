@@ -46,7 +46,7 @@ Porting the guest and deploy tooling to the current LEZ program model is a separ
 1. Port the registry guest and deploy path from LEZ v0.4.0-rc3 to the live LEZ program model.
 2. Rebuild the guest and CLI with `CARGO_BUILD_JOBS=2` and rerun the lifecycle against a local sequencer.
 3. Retry the live deploy without compatibility shims.
-4. Present a real program address, transaction hash, block ID, and explorer receipt. Until all four exist, the status stays **in progress, not claimed**.
+4. Present a real program address, transaction hash, block ID, and explorer receipt. Until all four exist, there is no deployment to report.
 
 ## Scope
 
